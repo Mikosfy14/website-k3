@@ -8,4 +8,12 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Custom K3 Colors */
+    --color-primary: #003366;
+    --color-secondary: #ffb300;
+    --color-primary-dark: #002244;
+    --color-primary-light: #004488;
+    --color-secondary-dark: #cc8f00;
+    --color-secondary-light: #ffc733;
 }
