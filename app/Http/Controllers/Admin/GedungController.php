@@ -28,7 +28,7 @@ class GedungController extends Controller
         ]);
 
         Gedung::create($request->all());
-        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil ditambahkan.');
+        return redirect()->route('admin.gedung.index')->with('success', 'Gedung berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -53,13 +53,13 @@ class GedungController extends Controller
 
         $gedung = Gedung::findOrFail($id);
         $gedung->update($request->all());
-        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil diupdate.');
+        return redirect()->route('admin.gedung.index')->with('success', 'Gedung berhasil diupdate.');
     }
 
     public function destroy($id)
     {
         $gedung = Gedung::findOrFail($id);
         $gedung->delete();
-        return redirect()->route('gedung.index')->with('success', 'Gedung berhasil dihapus.');
+        return redirect()->route('admin.gedung.index')->with('success', 'Gedung berhasil dihapus.');
     }
 }

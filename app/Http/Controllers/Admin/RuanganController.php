@@ -30,7 +30,7 @@ class RuanganController extends Controller
         ]);
 
         Ruangan::create($request->all());
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil ditambahkan.');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Ruangan berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -56,13 +56,13 @@ class RuanganController extends Controller
 
         $ruangan = Ruangan::findOrFail($id);
         $ruangan->update($request->all());
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil diupdate.');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Ruangan berhasil diupdate.');
     }
 
     public function destroy($id)
     {
         $ruangan = Ruangan::findOrFail($id);
         $ruangan->delete();
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil dihapus.');
+        return redirect()->route('admin.ruangan.index')->with('success', 'Ruangan berhasil dihapus.');
     }
 }

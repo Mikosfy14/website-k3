@@ -7,8 +7,8 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);">
                 <div class="card-body text-white p-4">
-                    <h2 class="mb-2">Dashboard Admin K3</h2>
-                    <p class="mb-0 opacity-75">Selamat datang di Sistem Manajemen Keselamatan dan Kesehatan Kerja</p>
+                    <h2 class="mb-2">Dashboard Admin</h2>
+                    <p class="mb-0 opacity-75">Selamat datang di Sistem Manajemen Data Website K3 Vokasi Brawijaya</p>
                 </div>
             </div>
         </div>
@@ -31,11 +31,6 @@
                             <h2 class="mb-0 fw-bold" style="color: var(--color-primary);">{{ $stats['gedung'] }}</h2>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <a href="{{ route('admin.gedung.index') }}" class="btn btn-sm btn-outline-primary">
-                            Kelola Gedung
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -54,11 +49,6 @@
                             <h6 class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Lantai</h6>
                             <h2 class="mb-0 fw-bold" style="color: var(--color-secondary);">{{ $stats['lantai'] }}</h2>
                         </div>
-                    </div>
-                    <div class="mt-3">
-                        <a href="{{ route('admin.lantai.index') }}" class="btn btn-sm" style="color: var(--color-secondary); border-color: var(--color-secondary);">
-                            Kelola Lantai
-                        </a>
                     </div>
                 </div>
             </div>
@@ -79,11 +69,6 @@
                             <h2 class="mb-0 fw-bold text-success">{{ $stats['jalur'] }}</h2>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <a href="{{ route('admin.jalur-mitigasi.index') }}" class="btn btn-sm btn-outline-success">
-                            Kelola Jalur
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -102,11 +87,6 @@
                             <h6 class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Ruangan</h6>
                             <h2 class="mb-0 fw-bold text-danger">{{ $stats['ruangan'] }}</h2>
                         </div>
-                    </div>
-                    <div class="mt-3">
-                        <a href="{{ route('admin.ruangan.index') }}" class="btn btn-sm btn-outline-danger">
-                            Kelola Ruangan
-                        </a>
                     </div>
                 </div>
             </div>
@@ -130,14 +110,14 @@
                                 <div>Tambah Gedung</div>
                             </a>
                         </div>
-                        <div class="col-md-3">
-                            <a href="{{ route('admin.jalur-mitigasi.create') }}" class="btn w-100 py-3 text-white" style="background-color: var(--color-secondary);">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                <div>Tambah Jalur</div>
-                            </a>
-                        </div>
+                    <div class="col-md-3">
+                        <a href="{{ route('admin.jalur-mitigasi.create') }}" class="btn btn-outline-warning w-100 py-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                            </svg>
+                            <div>Tambah Jalur</div>
+                        </a>
+                    </div>
                         <div class="col-md-3">
                             <a href="{{ route('admin.lantai.create') }}" class="btn btn-outline-success w-100 py-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">

@@ -24,23 +24,48 @@ class JalurMitigasiController extends Controller
         $request->validate([
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
-            'gambar_jalur_url' => 'nullable|url|max:255',
+            'gambar_jalur_url' => 'nullable|array',
+            'gambar_jalur_url.*' => 'nullable|url|max:255',
             'assembly_point' => 'required|string|max:100',
         ]);
 
-        JalurMitigasi::create($request->all());
-        return redirect()->route('jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil ditambahkan.');
+        $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
+
+        // Convert array of URLs to JSON string
+        if ($request->has('gambar_jalur_url')) {
+            $urls = array_filter($request->gambar_jalur_url); // Remove empty values
+            $data['gambar_jalur_url'] = !empty($urls) ? json_encode(array_values($urls)) : null;
+        }
+
+        JalurMitigasi::create($data);
+        return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil ditambahkan.');
     }
 
     public function show($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
+
+        // Decode JSON URLs
+        if ($jalur->gambar_jalur_url) {
+            $jalur->gambar_urls = json_decode($jalur->gambar_jalur_url, true);
+        } else {
+            $jalur->gambar_urls = [];
+        }
+
         return view('admin.jalur-mitigasi.show', compact('jalur'));
     }
 
     public function edit($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
+
+        // Decode JSON URLs for editing
+        if ($jalur->gambar_jalur_url) {
+            $jalur->gambar_urls = json_decode($jalur->gambar_jalur_url, true);
+        } else {
+            $jalur->gambar_urls = [];
+        }
+
         return view('admin.jalur-mitigasi.edit', compact('jalur'));
     }
 
@@ -49,19 +74,29 @@ class JalurMitigasiController extends Controller
         $request->validate([
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
-            'gambar_jalur_url' => 'nullable|url|max:255',
+            'gambar_jalur_url' => 'nullable|array',
+            'gambar_jalur_url.*' => 'nullable|url|max:255',
             'assembly_point' => 'required|string|max:100',
         ]);
 
         $jalur = JalurMitigasi::findOrFail($id);
-        $jalur->update($request->all());
-        return redirect()->route('jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
+
+        $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
+
+        // Convert array of URLs to JSON string
+        if ($request->has('gambar_jalur_url')) {
+            $urls = array_filter($request->gambar_jalur_url); // Remove empty values
+            $data['gambar_jalur_url'] = !empty($urls) ? json_encode(array_values($urls)) : null;
+        }
+
+        $jalur->update($data);
+        return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
     }
 
     public function destroy($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
         $jalur->delete();
-        return redirect()->route('jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil dihapus.');
+        return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil dihapus.');
     }
 }

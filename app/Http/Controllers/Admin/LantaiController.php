@@ -32,7 +32,7 @@ class LantaiController extends Controller
         ]);
 
         Lantai::create($request->all());
-        return redirect()->route('lantai.index')->with('success', 'Lantai berhasil ditambahkan.');
+        return redirect()->route('admin.lantai.index')->with('success', 'Lantai berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -59,13 +59,13 @@ class LantaiController extends Controller
 
         $lantai = Lantai::findOrFail($id);
         $lantai->update($request->all());
-        return redirect()->route('lantai.index')->with('success', 'Lantai berhasil diupdate.');
+        return redirect()->route('admin.lantai.index')->with('success', 'Lantai berhasil diupdate.');
     }
 
     public function destroy($id)
     {
         $lantai = Lantai::findOrFail($id);
         $lantai->delete();
-        return redirect()->route('lantai.index')->with('success', 'Lantai berhasil dihapus.');
+        return redirect()->route('admin.lantai.index')->with('success', 'Lantai berhasil dihapus.');
     }
 }

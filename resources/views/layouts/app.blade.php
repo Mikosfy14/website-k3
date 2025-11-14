@@ -4,37 +4,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin - {{ config('app.name', 'Website K3') }}</title>
-    <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        .nav-link {
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
 
-        .nav-link:hover {
-            background-color: rgba(0, 51, 102, 0.05);
-            padding-left: 1.2rem !important;
-        }
-
-        .nav-link.active {
-            background-color: var(--color-primary);
-            color: white !important;
-            font-weight: 500;
-        }
-
-        .nav-link.active svg {
-            fill: white !important;
-        }
-    </style>
 </head>
 <body class="d-flex">
-    <!-- Sidebar -->
-    <div class="bg-light sidebar d-flex flex-column p-3" style="width: 250px; height: 100vh; position: fixed;">
-        <h4 class="text-center mb-4" style="color: var(--color-primary);">Admin Panel K3</h4>
+    <!-- TOGGLE BUTTON -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        ☰ Menu
+    </button>
+
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar - DEFAULT HIDDEN DI MOBILE -->
+    <aside class="bg-light sidebar d-flex flex-column p-3" style="width: 250px; height: 100vh; position: fixed; z-index: 1000;">
+        <h4 class="text-center mb-4" style="color: #003366;">Admin Panel K3</h4>
         <nav class="nav flex-column">
             <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16" style="display: inline-block; vertical-align: text-bottom;">
@@ -53,7 +39,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16" style="display: inline-block; vertical-align: text-bottom;">
                     <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5"/>
                 </svg>
-                Jalur Mitigasi
+                Kelola Jalur Mitigasi
             </a>
             <a class="nav-link {{ request()->routeIs('admin.lantai.*') ? 'active' : '' }}" href="{{ route('admin.lantai.index') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16" style="display: inline-block; vertical-align: text-bottom;">
@@ -79,43 +65,91 @@
                 Logout
             </button>
         </form>
-    </div>
+    </aside>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 ms-3 p-3" style="margin-left: 250px;">
+    <div class="flex-grow-1 p-3 main-content" style="margin-left: 250px; min-height: 100vh; transition: margin-left 0.3s ease;">
         <nav class="navbar navbar-light bg-light mb-3 rounded shadow-sm">
             <span class="navbar-brand ms-3">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}!</span>
         </nav>
         @yield('content')
     </div>
 
+    <!-- SIMPLE JAVASCRIPT -->
     <script>
-        // Prevent back button after logout
-        window.onload = function() {
-            // Check if user is authenticated by checking for auth meta tag or session
-            if (typeof window.performance !== 'undefined' && window.performance.navigation.type === 2) {
-                // Page accessed via back/forward button
-                // Force reload to check authentication status
-                window.location.reload();
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            console.log('Script loaded');
+            console.log('Toggle button:', toggleBtn);
+            console.log('Sidebar:', sidebar);
+            
+            // Function to check screen size and set initial state
+            function checkScreenSize() {
+                if (window.innerWidth <= 1024) {
+                    // Mobile - hide sidebar by default
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    toggleBtn.classList.remove('shifted');
+                    toggleBtn.textContent = '☰ Menu';
+                    console.log('Mobile mode - sidebar hidden');
+                } else {
+                    // Desktop - show sidebar
+                    sidebar.classList.add('active');
+                    console.log('Desktop mode - sidebar visible');
+                }
             }
-        };
-
-        // Handle logout form submission
-        const logoutForm = document.getElementById('logout-form');
-        if (logoutForm) {
-            logoutForm.addEventListener('submit', function(e) {
-                // Set flag in sessionStorage when logging out
-                sessionStorage.setItem('loggedOut', 'true');
-                // Clear any cached data
-                sessionStorage.removeItem('lastPage');
-            });
-        }
-
-        // Detect if user came back after logout
-        if (sessionStorage.getItem('loggedOut') === 'true') {
-            sessionStorage.removeItem('loggedOut');
-            window.location.href = '{{ route("login") }}';
-        }
+            
+            // Initial check
+            checkScreenSize();
+            
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', function() {
+                    console.log('Toggle button clicked');
+                    
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    toggleBtn.classList.toggle('shifted');
+                    
+                    if (sidebar.classList.contains('active')) {
+                        toggleBtn.textContent = '✕ Close';
+                        console.log('Sidebar opened');
+                    } else {
+                        toggleBtn.textContent = '☰ Menu';
+                        console.log('Sidebar closed');
+                    }
+                });
+                
+                // Close sidebar when overlay clicked
+                if (overlay) {
+                    overlay.addEventListener('click', function() {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                        toggleBtn.classList.remove('shifted');
+                        toggleBtn.textContent = '☰ Menu';
+                    });
+                }
+                
+                // Close sidebar when nav link clicked (mobile)
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 1024) {
+                            setTimeout(() => {
+                                sidebar.classList.remove('active');
+                                overlay.classList.remove('active');
+                                toggleBtn.classList.remove('shifted');
+                                toggleBtn.textContent = '☰ Menu';
+                            }, 300);
+                        }
+                    });
+                });
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', checkScreenSize);
+        });
     </script>
 </body>
 </html>
