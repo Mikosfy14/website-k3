@@ -22,7 +22,7 @@
                     <h5 class="mb-0 fw-bold">Edit Jalur Evakuasi</h5>
                 </div>
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.jalur-mitigasi.update', $jalur->id_jalur) }}" method="POST">
+                    <form action="{{ route('admin.jalur-mitigasi.update', $jalur->id_jalur) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -62,42 +62,41 @@
                             @enderror
                         </div>
 
-                        <!-- URL Gambar Jalur (Multiple) -->
+                        <!-- Gambar Jalur Existing -->
+                        @if(!empty($jalur->gambar_urls))
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">URL Gambar Jalur (View 360)</label>
-                            <div id="url-container">
-                                @if(!empty($jalur->gambar_urls))
-                                    @foreach($jalur->gambar_urls as $index => $url)
-                                    <div class="input-group mb-2 url-input-group">
-                                        <input type="url" class="form-control" 
-                                               name="gambar_jalur_url[]" 
-                                               placeholder="https://example.com/image.jpg" 
-                                               value="{{ old('gambar_jalur_url.'.$index, $url) }}">
-                                        <button type="button" class="btn btn-danger remove-url" {{ count($jalur->gambar_urls) == 1 ? 'disabled' : '' }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    @endforeach
-                                @else
-                                    <div class="input-group mb-2 url-input-group">
-                                        <input type="url" class="form-control" name="gambar_jalur_url[]" placeholder="https://example.com/image.jpg">
-                                        <button type="button" class="btn btn-danger remove-url" disabled>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                @endif
+                            <label class="form-label fw-semibold">Gambar Saat Ini</label>
+                            <div class="d-flex flex-wrap gap-2" id="existing-images">
+                                @foreach($jalur->gambar_urls as $index => $imagePath)
+                                <div class="position-relative existing-image-item" data-path="{{ $imagePath }}">
+                                    <img src="{{ asset('storage/' . $imagePath) }}"
+                                         class="img-thumbnail"
+                                         style="width: 120px; height: 120px; object-fit: cover;">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 remove-existing-image">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endforeach
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-url">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                Tambah URL Gambar
-                            </button>
-                            <small class="text-muted d-block mt-2">Masukkan URL gambar untuk view 360. Anda bisa menambahkan beberapa gambar.</small>
+                        </div>
+                        @endif
+
+                        <!-- Upload Gambar Baru -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Upload Gambar Baru</label>
+                            <input type="file" class="form-control @error('gambar_jalur') is-invalid @enderror"
+                                   id="gambar_jalur" name="gambar_jalur[]" accept="image/*" multiple>
+                            <small class="text-muted d-block mt-2">
+                                Upload gambar jalur evakuasi. Format: JPEG, PNG, JPG, GIF, SVG. Maksimal 5MB per file.
+                            </small>
+                            @error('gambar_jalur')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+
+                            <!-- Preview Container for New Images -->
+                            <div id="preview-container" class="mt-3 d-flex flex-wrap gap-2"></div>
                         </div>
 
                         <!-- Buttons -->
@@ -144,38 +143,90 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('url-container');
-    const addButton = document.getElementById('add-url');
+    const fileInput = document.getElementById('gambar_jalur');
+    const previewContainer = document.getElementById('preview-container');
+    const existingImagesContainer = document.getElementById('existing-images');
+    const deletedImages = [];
 
-    // Add URL input
-    addButton.addEventListener('click', function() {
-        const newInput = document.createElement('div');
-        newInput.className = 'input-group mb-2 url-input-group';
-        newInput.innerHTML = `
-            <input type="url" class="form-control" name="gambar_jalur_url[]" placeholder="https://example.com/image.jpg">
-            <button type="button" class="btn btn-danger remove-url">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                </svg>
-            </button>
-        `;
-        container.appendChild(newInput);
-        updateRemoveButtons();
+    // Preview new uploaded images
+    fileInput.addEventListener('change', function(e) {
+        previewContainer.innerHTML = '';
+        const files = Array.from(e.target.files);
+
+        files.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'position-relative';
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 bg-success bg-opacity-75 text-white px-2 py-1 rounded-end" style="font-size: 0.7rem;">
+                            Baru ${index + 1}
+                        </div>
+                    `;
+                    previewContainer.appendChild(previewDiv);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
     });
 
-    // Remove URL input
-    container.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-url')) {
-            e.target.closest('.url-input-group').remove();
-            updateRemoveButtons();
-        }
-    });
+    // Remove existing images
+    if (existingImagesContainer) {
+        existingImagesContainer.addEventListener('click', function(e) {
+            const removeBtn = e.target.closest('.remove-existing-image');
+            if (removeBtn) {
+                const imageItem = removeBtn.closest('.existing-image-item');
+                const imagePath = imageItem.dataset.path;
 
-    // Update remove button states
-    function updateRemoveButtons() {
-        const removeButtons = container.querySelectorAll('.remove-url');
-        removeButtons.forEach(btn => {
-            btn.disabled = removeButtons.length === 1;
+                // Add to delete list
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'hapus_gambar[]';
+                input.value = imagePath;
+                document.querySelector('form').appendChild(input);
+
+                // Visual removal
+                imageItem.style.opacity = '0.3';
+                imageItem.style.border = '2px dashed red';
+                removeBtn.remove();
+
+                // Add restore button
+                const restoreBtn = document.createElement('button');
+                restoreBtn.type = 'button';
+                restoreBtn.className = 'btn btn-primary btn-sm position-absolute top-0 end-0 m-1 restore-image';
+                restoreBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                    </svg>
+                `;
+                imageItem.appendChild(restoreBtn);
+
+                // Restore functionality
+                restoreBtn.addEventListener('click', function() {
+                    imageItem.style.opacity = '1';
+                    imageItem.style.border = 'none';
+                    restoreBtn.remove();
+
+                    // Remove from delete list
+                    input.remove();
+
+                    // Add back remove button
+                    const newRemoveBtn = document.createElement('button');
+                    newRemoveBtn.type = 'button';
+                    newRemoveBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 m-1 remove-existing-image';
+                    newRemoveBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                    `;
+                    imageItem.appendChild(newRemoveBtn);
+                });
+            }
         });
     }
 });

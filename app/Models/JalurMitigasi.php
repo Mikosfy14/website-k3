@@ -19,4 +19,23 @@ class JalurMitigasi extends Model
     {
         return $this->hasMany(Lantai::class, 'id_jalur', 'id_jalur');
     }
+
+    // Accessor untuk mendapatkan array gambar
+    public function getGambarUrlsAttribute()
+    {
+        if (empty($this->gambar_jalur_url)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->gambar_jalur_url, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    // Accessor untuk mendapatkan URL gambar dengan full path
+    public function getGambarFullUrlsAttribute()
+    {
+        return array_map(function($path) {
+            return asset('storage/' . $path);
+        }, $this->gambar_urls);
+    }
 }

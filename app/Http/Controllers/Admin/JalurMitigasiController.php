@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JalurMitigasi;
+use Illuminate\Support\Facades\Storage;
 
 class JalurMitigasiController extends Controller
 {
@@ -24,17 +25,23 @@ class JalurMitigasiController extends Controller
         $request->validate([
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
-            'gambar_jalur_url' => 'nullable|array',
-            'gambar_jalur_url.*' => 'nullable|url|max:255',
+            'gambar_jalur' => 'nullable|array',
+            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'assembly_point' => 'required|string|max:100',
         ]);
 
         $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
 
-        // Convert array of URLs to JSON string
-        if ($request->has('gambar_jalur_url')) {
-            $urls = array_filter($request->gambar_jalur_url); // Remove empty values
-            $data['gambar_jalur_url'] = !empty($urls) ? json_encode(array_values($urls)) : null;
+        // Handle multiple image uploads
+        if ($request->hasFile('gambar_jalur')) {
+            $uploadedPaths = [];
+            foreach ($request->file('gambar_jalur') as $file) {
+                if ($file && $file->isValid()) {
+                    $path = $file->store('jalur-mitigasi', 'public');
+                    $uploadedPaths[] = $path;
+                }
+            }
+            $data['gambar_jalur_url'] = !empty($uploadedPaths) ? json_encode($uploadedPaths) : null;
         }
 
         JalurMitigasi::create($data);
@@ -44,28 +51,12 @@ class JalurMitigasiController extends Controller
     public function show($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
-
-        // Decode JSON URLs
-        if ($jalur->gambar_jalur_url) {
-            $jalur->gambar_urls = json_decode($jalur->gambar_jalur_url, true);
-        } else {
-            $jalur->gambar_urls = [];
-        }
-
         return view('admin.jalur-mitigasi.show', compact('jalur'));
     }
 
     public function edit($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
-
-        // Decode JSON URLs for editing
-        if ($jalur->gambar_jalur_url) {
-            $jalur->gambar_urls = json_decode($jalur->gambar_jalur_url, true);
-        } else {
-            $jalur->gambar_urls = [];
-        }
-
         return view('admin.jalur-mitigasi.edit', compact('jalur'));
     }
 
@@ -74,8 +65,10 @@ class JalurMitigasiController extends Controller
         $request->validate([
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
-            'gambar_jalur_url' => 'nullable|array',
-            'gambar_jalur_url.*' => 'nullable|url|max:255',
+            'gambar_jalur' => 'nullable|array',
+            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'hapus_gambar' => 'nullable|array',
+            'hapus_gambar.*' => 'nullable|string',
             'assembly_point' => 'required|string|max:100',
         ]);
 
@@ -83,11 +76,31 @@ class JalurMitigasiController extends Controller
 
         $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
 
-        // Convert array of URLs to JSON string
-        if ($request->has('gambar_jalur_url')) {
-            $urls = array_filter($request->gambar_jalur_url); // Remove empty values
-            $data['gambar_jalur_url'] = !empty($urls) ? json_encode(array_values($urls)) : null;
+        // Get existing images
+        $existingImages = $jalur->gambar_jalur_url ? json_decode($jalur->gambar_jalur_url, true) : [];
+
+        // Remove deleted images from storage and array
+        if ($request->has('hapus_gambar')) {
+            foreach ($request->hapus_gambar as $imagePath) {
+                if (\in_array($imagePath, $existingImages)) {
+                    Storage::disk('public')->delete($imagePath);
+                    $existingImages = array_diff($existingImages, [$imagePath]);
+                }
+            }
+            $existingImages = array_values($existingImages); // Re-index array
         }
+
+        // Handle new image uploads
+        if ($request->hasFile('gambar_jalur')) {
+            foreach ($request->file('gambar_jalur') as $file) {
+                if ($file && $file->isValid()) {
+                    $path = $file->store('jalur-mitigasi', 'public');
+                    $existingImages[] = $path;
+                }
+            }
+        }
+
+        $data['gambar_jalur_url'] = !empty($existingImages) ? json_encode($existingImages) : null;
 
         $jalur->update($data);
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
@@ -96,6 +109,17 @@ class JalurMitigasiController extends Controller
     public function destroy($id)
     {
         $jalur = JalurMitigasi::findOrFail($id);
+
+        // Delete all associated images from storage
+        if ($jalur->gambar_jalur_url) {
+            $images = json_decode($jalur->gambar_jalur_url, true);
+            if (\is_array($images)) {
+                foreach ($images as $imagePath) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+            }
+        }
+
         $jalur->delete();
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil dihapus.');
     }

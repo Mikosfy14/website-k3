@@ -59,31 +59,23 @@
                             @enderror
                         </div>
 
-                        <!-- URL Gambar Jalur (Multiple) -->
+                        <!-- Upload Gambar Jalur (Multiple) -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">URL Gambar Jalur (View 360)</label>
-                            <div id="url-container">
-                                <div class="input-group mb-2 url-input-group">
-                                    <input type="url" class="form-control @error('gambar_jalur_url.0') is-invalid @enderror" 
-                                           name="gambar_jalur_url[]" placeholder="https://example.com/image.jpg" 
-                                           value="{{ old('gambar_jalur_url.0') }}">
-                                    <button type="button" class="btn btn-danger remove-url" disabled>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-url">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                Tambah URL Gambar
-                            </button>
-                            <small class="text-muted d-block mt-2">Masukkan URL gambar untuk view 360. Anda bisa menambahkan beberapa gambar.</small>
-                            @error('gambar_jalur_url')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            <label class="form-label fw-semibold">Gambar Jalur Evakuasi</label>
+                            <input type="file" class="form-control @error('gambar_jalur') is-invalid @enderror"
+                                   id="gambar_jalur" name="gambar_jalur[]" accept="image/*" multiple>
+                            <small class="text-muted d-block mt-2">
+                                Upload gambar jalur evakuasi. Format: JPEG, PNG, JPG, GIF, SVG. Maksimal 5MB per file. Bisa upload multiple gambar.
+                            </small>
+                            @error('gambar_jalur')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                            @error('gambar_jalur.*')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+
+                            <!-- Preview Container -->
+                            <div id="preview-container" class="mt-3 d-flex flex-wrap gap-2"></div>
                         </div>
 
                         <!-- Buttons -->
@@ -116,8 +108,8 @@
                         <li class="mb-2">Nama jalur harus jelas dan mudah dikenali</li>
                         <li class="mb-2">Assembly point adalah titik kumpul akhir</li>
                         <li class="mb-2">Deskripsi berisi instruksi jalur evakuasi</li>
-                        <li class="mb-2">URL gambar untuk view 360 (opsional)</li>
-                        <li>Bisa menambahkan multiple URL gambar</li>
+                        <li class="mb-2">Upload gambar jalur evakuasi (opsional)</li>
+                        <li>Bisa upload multiple gambar sekaligus</li>
                     </ul>
                 </div>
             </div>
@@ -127,43 +119,33 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let urlCount = 1;
-    const container = document.getElementById('url-container');
-    const addButton = document.getElementById('add-url');
+    const fileInput = document.getElementById('gambar_jalur');
+    const previewContainer = document.getElementById('preview-container');
 
-    // Add URL input
-    addButton.addEventListener('click', function() {
-        const newInput = document.createElement('div');
-        newInput.className = 'input-group mb-2 url-input-group';
-        newInput.innerHTML = `
-            <input type="url" class="form-control" name="gambar_jalur_url[]" placeholder="https://example.com/image.jpg">
-            <button type="button" class="btn btn-danger remove-url">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                </svg>
-            </button>
-        `;
-        container.appendChild(newInput);
-        urlCount++;
-        updateRemoveButtons();
-    });
+    fileInput.addEventListener('change', function(e) {
+        previewContainer.innerHTML = '';
+        const files = Array.from(e.target.files);
 
-    // Remove URL input
-    container.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-url')) {
-            e.target.closest('.url-input-group').remove();
-            urlCount--;
-            updateRemoveButtons();
-        }
-    });
+        files.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
 
-    // Update remove button states
-    function updateRemoveButtons() {
-        const removeButtons = container.querySelectorAll('.remove-url');
-        removeButtons.forEach(btn => {
-            btn.disabled = removeButtons.length === 1;
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'position-relative';
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white px-2 py-1 rounded-end" style="font-size: 0.7rem;">
+                            ${index + 1}
+                        </div>
+                    `;
+                    previewContainer.appendChild(previewDiv);
+                };
+
+                reader.readAsDataURL(file);
+            }
         });
-    }
+    });
 });
 </script>
 @endsection

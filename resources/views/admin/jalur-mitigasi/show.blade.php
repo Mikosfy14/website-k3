@@ -74,22 +74,29 @@
 
                     <!-- Gambar Jalur -->
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted small">GAMBAR JALUR (VIEW 360)</label>
+                        <label class="form-label fw-semibold text-muted small">GAMBAR JALUR EVAKUASI</label>
                         @if(!empty($jalur->gambar_urls))
-                            <div class="list-group">
-                                @foreach($jalur->gambar_urls as $index => $url)
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <small class="text-muted">Gambar {{ $index + 1 }}</small>
-                                        <p class="mb-0 small">{{ $url }}</p>
+                            <div class="row g-3">
+                                @foreach($jalur->gambar_urls as $index => $imagePath)
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <img src="{{ asset('storage/' . $imagePath) }}"
+                                             class="card-img-top"
+                                             alt="Gambar Jalur {{ $index + 1 }}"
+                                             style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <p class="card-text text-muted small mb-2">Gambar {{ $index + 1 }}</p>
+                                            <a href="{{ asset('storage/' . $imagePath) }}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary w-100">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                                </svg>
+                                                Lihat Penuh
+                                            </a>
+                                        </div>
                                     </div>
-                                    <a href="{{ $url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
-                                            <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
-                                        </svg>
-                                        Lihat
-                                    </a>
                                 </div>
                                 @endforeach
                             </div>
