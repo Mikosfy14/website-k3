@@ -72,6 +72,7 @@
                                          alt="Peta Jalur {{ $jalur->nama_jalur }}"
                                          class="img-fluid rounded border shadow-sm"
                                          onerror="this.parentElement.innerHTML='<div class=\'alert alert-secondary\'>Gambar jalur tidak tersedia</div>'">
+                                         
                                 </div>
                             @endif
 
@@ -93,6 +94,7 @@
                                         Titik Kumpul (Assembly Point):
                                     </h6>
                                     <p class="mb-0 ms-4">{{ $jalur->assembly_point }}</p>
+                                    <iframe width="600" height="400" allowfullscreen style="border-style:none;" src="https://cdn.pannellum.org/2.5/pannellum.htm#panorama=https://pannellum.org/images/alma.jpg"></iframe>
                                 </div>
                             @endif
                         </div>
