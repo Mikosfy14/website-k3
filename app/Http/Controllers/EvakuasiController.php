@@ -10,8 +10,21 @@ class EvakuasiController extends Controller
 {
     public function index()
     {
-        $lantais = Lantai::all();  // Opsional: Dropdown lantai
-        return view('evakuasi.index', compact('lantais'));
+        $lantais = Lantai::with('gedung')->get();
+
+        // Preload data ruangan untuk setiap lantai
+        $ruanganData = [];
+        foreach ($lantais as $lantai) {
+            $ruanganData[$lantai->nama_lantai] = Ruangan::where('id_lantai', $lantai->id_lantai)
+                ->select('nama_ruangan', 'kode_ruangan')
+                ->get()
+                ->toArray();
+        }
+
+        // Convert to JSON for JavaScript
+        $ruanganDataJson = json_encode($ruanganData);
+
+        return view('evakuasi.index', compact('lantais', 'ruanganDataJson'));
     }
 
     public function cari(Request $request)
@@ -26,9 +39,7 @@ class EvakuasiController extends Controller
 
         // Cari berdasarkan ruangan kalau diisi
         if ($ruanganInput) {
-            $ruangan = Ruangan::where('nama_ruangan', 'like', "%$ruanganInput%")
-                ->orWhere('kode_ruangan', 'like', "%$ruanganInput%")
-                ->first();
+            $ruangan = Ruangan::where('nama_ruangan', $ruanganInput)->first();
 
             if ($ruangan) {
                 $lantai = $ruangan->lantai;

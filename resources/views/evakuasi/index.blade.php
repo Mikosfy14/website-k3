@@ -53,15 +53,23 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16">
                                             <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6z"/>
                                         </svg>
-                                        Lantai
+                                        Pilih Lantai
                                     </label>
-                                    <input type="text" class="form-control form-control-lg @error('lantai') is-invalid @enderror"
-                                           id="lantai" name="lantai" placeholder="Contoh: Lantai 1, Lantai 2, dll"
-                                           value="{{ old('lantai') }}" required>
-                                    @error('lantai')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                        <select class="form-select form-control-lg @error('lantai') is-invalid @enderror" 
+                                                id="lantai" name="lantai" required>
+                                            <option value="">-- Pilih Lantai --</option>
+                                            @foreach($lantais as $lantai)
+                                                <option value="{{ $lantai->nama_lantai }}" 
+                                                    {{ old('lantai') == $lantai->nama_lantai ? 'selected' : '' }}>
+                                                    {{ $lantai->nama_lantai }} - {{ $lantai->gedung->nama_gedung }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('lantai')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     <div class="form-text">Masukkan nama lantai tempat Anda berada</div>
+
                                 </div>
 
                                 <div class="mb-4">
@@ -69,12 +77,17 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16">
                                             <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5"/>
                                         </svg>
-                                        Ruangan (Opsional)
+                                        Pilih Ruangan (Opsional)
                                     </label>
-                                    <input type="text" class="form-control form-control-lg"
-                                           id="ruangan" name="ruangan" placeholder="Contoh: Ruang 101, Lab Komputer, dll"
-                                           value="{{ old('ruangan') }}">
-                                    <div class="form-text">Opsional: Masukkan nama atau kode ruangan untuk pencarian lebih spesifik</div>
+                                        <select class="form-select form-control-lg @error('ruangan') is-invalid @enderror" 
+                                        id="ruangan" name="ruangan">
+                                            <option value="">-- Pilih Ruangan (Opsional) --</option>
+                                            <!-- Ruangan akan di-load via JavaScript -->
+                                        </select>
+                                        @error('ruangan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">Kosongkan jika ingin mencari berdasarkan lantai saja</small>
                                 </div>
 
                                 <div class="d-grid">
@@ -142,4 +155,51 @@
             </div>
         </div>
     </section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lantaiSelect = document.getElementById('lantai');
+        const ruanganSelect = document.getElementById('ruangan');
+        
+        // Data ruangan per lantai (dari PHP via JSON)
+        const ruanganData = {!! $ruanganDataJson !!};
+
+        console.log('Ruangan Data:', ruanganData); // Untuk debugging
+
+        lantaiSelect.addEventListener('change', function() {
+            const selectedLantai = this.value;
+            console.log('Lantai dipilih:', selectedLantai); // Untuk debugging
+            
+            // Reset dropdown ruangan
+            ruanganSelect.innerHTML = '<option value="">-- Pilih Ruangan (Opsional) --</option>';
+            
+            if (selectedLantai && ruanganData[selectedLantai]) {
+                console.log('Ruangan tersedia:', ruanganData[selectedLantai]); // Untuk debugging
+                
+                ruanganData[selectedLantai].forEach(ruangan => {
+                    const option = document.createElement('option');
+                    option.value = ruangan.nama_ruangan;
+                    option.textContent = ruangan.nama_ruangan + ' (' + ruangan.kode_ruangan + ')';
+                    ruanganSelect.appendChild(option);
+                });
+            } else {
+                console.log('Tidak ada ruangan untuk lantai ini'); // Untuk debugging
+            }
+        });
+
+        // Trigger change event jika ada nilai sebelumnya (setelah form submission dengan error)
+        @if(old('lantai'))
+            lantaiSelect.value = "{{ old('lantai') }}";
+            lantaiSelect.dispatchEvent(new Event('change'));
+            
+            // Set nilai ruangan jika ada
+            @if(old('ruangan'))
+                setTimeout(() => {
+                    ruanganSelect.value = "{{ old('ruangan') }}";
+                }, 100);
+            @endif
+        @endif
+    });
+</script>
 </x-layouts.public>

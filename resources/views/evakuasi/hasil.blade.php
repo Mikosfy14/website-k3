@@ -15,7 +15,7 @@
         <div class="row">
             <!-- Informasi Lokasi -->
             <div class="col-lg-4 mb-4">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card border-0 shadow-lg mb-4">
                     <div class="card-header text-white" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);">
                         <h5 class="mb-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="me-2" viewBox="0 0 16 16">
