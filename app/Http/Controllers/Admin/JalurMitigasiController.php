@@ -9,10 +9,24 @@ use Illuminate\Support\Facades\Storage;
 
 class JalurMitigasiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jalurs = JalurMitigasi::all();
-        return view('admin.jalur-mitigasi.index', compact('jalurs'));
+        $query = JalurMitigasi::query();
+
+        // Search berdasarkan nama jalur
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('nama_jalur', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter berdasarkan assembly point
+        if ($request->has('assembly_point') && !empty($request->assembly_point)) {
+            $query->where('assembly_point', $request->assembly_point);
+        }
+
+        $jalurs = $query->paginate(5);
+        $assemblyPoints = JalurMitigasi::distinct()->pluck('assembly_point');
+
+        return view('admin.jalur-mitigasi.index', compact('jalurs', 'assemblyPoints'));
     }
 
     public function create()

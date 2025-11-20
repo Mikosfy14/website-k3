@@ -33,6 +33,47 @@
     </div>
     @endif
 
+    <!-- Search & Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('admin.ruangan.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="search" class="form-label">Cari Nama Ruangan</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request('search') }}" placeholder="Masukkan nama ruangan...">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lantai" class="form-label">Filter Berdasarkan Lantai</label>
+                                <select class="form-select" id="lantai" name="lantai">
+                                    <option value="">Semua Lantai</option>
+                                    @foreach($lantais as $lantai)
+                                        <option value="{{ $lantai->id_lantai }}" 
+                                                {{ request('lantai') == $lantai->id_lantai ? 'selected' : '' }}>
+                                            {{ $lantai->nama_lantai }} - {{ $lantai->gedung->nama_gedung }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="d-grid w-100">
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                        </svg>
+                                        Terapkan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Table -->
     <div class="row">
         <div class="col-12">
@@ -53,7 +94,7 @@
                             <tbody>
                                 @forelse($ruangans as $index => $ruangan)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ ($ruangans->currentPage() - 1) * $ruangans->perPage() + $index + 1 }}</td>
                                     <td>
                                         <span class="badge bg-secondary">{{ $ruangan->kode_ruangan }}</span>
                                     </td>
@@ -103,6 +144,18 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    @if($ruangans->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            Menampilkan {{ $ruangans->firstItem() ?? 0 }} - {{ $ruangans->lastItem() ?? 0 }} dari {{ $ruangans->total() }} data
+                        </div>
+                        <nav>
+                            {{ $ruangans->links() }}
+                        </nav>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

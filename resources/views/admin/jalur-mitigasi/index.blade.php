@@ -33,6 +33,47 @@
     </div>
     @endif
 
+    <!-- Search & Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" action="{{ route('admin.jalur-mitigasi.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="search" class="form-label">Cari Nama Jalur</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request('search') }}" placeholder="Masukkan nama jalur...">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="assembly_point" class="form-label">Filter Assembly Point</label>
+                                <select class="form-select" id="assembly_point" name="assembly_point">
+                                    <option value="">Semua Assembly Point</option>
+                                    @foreach($assemblyPoints as $point)
+                                        <option value="{{ $point }}" 
+                                                {{ request('assembly_point') == $point ? 'selected' : '' }}>
+                                            {{ $point }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="d-grid w-100">
+                                    <button type="submit" class="btn btn-warning">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                        </svg>
+                                        Terapkan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Table -->
     <div class="row">
         <div class="col-12">
@@ -53,7 +94,7 @@
                             <tbody>
                                 @forelse($jalurs as $index => $jalur)
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ ($jalurs->currentPage() - 1) * $jalurs->perPage() + $index + 1 }}</td>
                                     <td class="fw-semibold">{{ $jalur->nama_jalur }}</td>
                                     <td>{{ Str::limit($jalur->deskripsi_teks, 60) }}</td>
                                     <td>
@@ -105,6 +146,18 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    @if($jalurs->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            Menampilkan {{ $jalurs->firstItem() ?? 0 }} - {{ $jalurs->lastItem() ?? 0 }} dari {{ $jalurs->total() }} data
+                        </div>
+                        <nav>
+                            {{ $jalurs->links() }}
+                        </nav>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

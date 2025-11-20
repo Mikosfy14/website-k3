@@ -9,10 +9,24 @@ use App\Models\Lantai;
 
 class RuanganController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $ruangans = Ruangan::with('lantai')->get();
-        return view('admin.ruangan.index', compact('ruangans'));
+        $query = Ruangan::with('lantai.gedung');
+
+        // Search berdasarkan nama ruangan
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('nama_ruangan', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter berdasarkan lantai
+        if ($request->has('lantai') && !empty($request->lantai)) {
+            $query->where('id_lantai', $request->lantai);
+        }
+
+        $ruangans = $query->paginate(5);
+        $lantais = Lantai::with('gedung')->get();
+
+        return view('admin.ruangan.index', compact('ruangans', 'lantais'));
     }
 
     public function create()
@@ -35,7 +49,7 @@ class RuanganController extends Controller
 
     public function show($id)
     {
-        $ruangan = Ruangan::with('lantai')->findOrFail($id);
+        $ruangan = Ruangan::with('lantai.gedung')->findOrFail($id);
         return view('admin.ruangan.show', compact('ruangan'));
     }
 

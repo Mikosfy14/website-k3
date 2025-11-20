@@ -2,31 +2,29 @@
     <x-slot:title>Beranda</x-slot:title>
 
     <!-- Hero Section -->
-    <section class="py-5" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 text-white">
-                    <h1 class="display-4 fw-bold mb-4">Sistem Pencarian Jalur Evakuasi</h1>
-                    <p class="lead mb-4">Temukan jalur evakuasi terdekat dari lokasi Anda dengan cepat dan mudah. Keselamatan adalah prioritas utama kami.</p>
-                    <div class="d-flex gap-3">
-                        <a href="#cari-jalur" class="btn btn-secondary-custom btn-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="me-2" viewBox="0 0 16 16" style="display: inline-block; vertical-align: text-bottom;">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                            </svg>
-                            Cari Jalur Sekarang
-                        </a>
-                    </div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container-fluid">
+        <div class="row align-items-center min-vh-100">
+            <!-- Content di sebelah kiri -->
+            <div class="col-lg-6">
+                <div class="ps-lg-5">
+                    <h1 class="display-4 fw-bold mb-3">Sistem Informasi Jalur Evakuasi</h1>
+                    <p class="lead mb-4">Temukan jalur evakuasi terdekat berdasarkan lokasi Anda saat ini. Keselamatan Anda adalah prioritas kami.</p>
                 </div>
-                <div class="col-lg-6 text-center mt-5 mt-lg-0">
-                    <div class="p-5">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" fill="var(--color-secondary)" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>
-                        </svg>
+            </div>
+            
+            <!-- Gambar di sebelah kanan -->
+            <div class="col-lg-6 position-relative">
+                <div class="hero-image-container">
+                    <!-- Ganti dengan path gambar custom Anda -->
+                    <img src="{{ asset('images/evacuation-hero.jpg') }}" alt="ub dieng" class="hero-image">
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Search Form Section -->
     <section id="cari-jalur" class="py-5">

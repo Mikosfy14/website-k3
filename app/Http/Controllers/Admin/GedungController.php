@@ -8,9 +8,20 @@ use App\Models\Gedung;
 
 class GedungController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $gedungs = Gedung::all();
+        $query = Gedung::query();
+
+        // Search berdasarkan nama gedung atau alamat
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_gedung', 'like', '%' . $request->search . '%')
+                    ->orWhere('alamat_gedung', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $gedungs = $query->paginate(5);
+
         return view('admin.gedung.index', compact('gedungs'));
     }
 
