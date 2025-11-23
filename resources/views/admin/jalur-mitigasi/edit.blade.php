@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-4">
@@ -62,17 +63,20 @@
                             @enderror
                         </div>
 
-                        <!-- Gambar Jalur Existing -->
-                        @if(!empty($jalur->gambar_urls))
+                        @if(!empty($jalur->gambar_urls) && count($jalur->gambar_urls) > 0)
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Gambar Saat Ini</label>
                             <div class="d-flex flex-wrap gap-2" id="existing-images">
                                 @foreach($jalur->gambar_urls as $index => $imagePath)
-                                <div class="position-relative existing-image-item" data-path="{{ $imagePath }}">
+                                <div class="position-relative existing-image-item" id="image-{{ $index }}" data-path="{{ $imagePath }}">
                                     <img src="{{ asset('storage/' . $imagePath) }}"
-                                         class="img-thumbnail"
-                                         style="width: 120px; height: 120px; object-fit: cover;">
-                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 remove-existing-image">
+                                        class="img-thumbnail"
+                                        style="width: 120px; height: 120px; object-fit: cover;">
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-image-btn"
+                                            data-image-path="{{ $imagePath }}"
+                                            data-jalur-id="{{ $jalur->id_jalur }}"
+                                            data-index="{{ $index }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
                                         </svg>
@@ -142,93 +146,111 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('gambar_jalur');
-    const previewContainer = document.getElementById('preview-container');
-    const existingImagesContainer = document.getElementById('existing-images');
-    const deletedImages = [];
-
-    // Preview new uploaded images
-    fileInput.addEventListener('change', function(e) {
-        previewContainer.innerHTML = '';
-        const files = Array.from(e.target.files);
-
-        files.forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    const previewDiv = document.createElement('div');
-                    previewDiv.className = 'position-relative';
-                    previewDiv.innerHTML = `
-                        <img src="${e.target.result}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
-                        <div class="position-absolute top-0 start-0 bg-success bg-opacity-75 text-white px-2 py-1 rounded-end" style="font-size: 0.7rem;">
-                            Baru ${index + 1}
-                        </div>
-                    `;
-                    previewContainer.appendChild(previewDiv);
-                };
-
-                reader.readAsDataURL(file);
-            }
-        });
+// Simple direct event binding
+function initDeleteButtons() {
+    console.log('🔄 Initializing delete buttons...');
+    
+    const deleteButtons = document.querySelectorAll('.delete-image-btn');
+    console.log('🔘 Found delete buttons:', deleteButtons.length);
+    
+    deleteButtons.forEach(button => {
+        // Remove existing event listeners to avoid duplicates
+        button.replaceWith(button.cloneNode(true));
     });
+    
+    // Re-select buttons after clone
+    const freshButtons = document.querySelectorAll('.delete-image-btn');
+    
+    freshButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Delete button clicked directly!', this);
+            
+            const imagePath = this.dataset.imagePath;
+            const jalurId = this.dataset.jalurId;
+            const index = this.dataset.index;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Remove existing images
-    if (existingImagesContainer) {
-        existingImagesContainer.addEventListener('click', function(e) {
-            const removeBtn = e.target.closest('.remove-existing-image');
-            if (removeBtn) {
-                const imageItem = removeBtn.closest('.existing-image-item');
-                const imagePath = imageItem.dataset.path;
+            console.log('Button data:', { jalurId, imagePath, index });
 
-                // Add to delete list
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'hapus_gambar[]';
-                input.value = imagePath;
-                document.querySelector('form').appendChild(input);
-
-                // Visual removal
-                imageItem.style.opacity = '0.3';
-                imageItem.style.border = '2px dashed red';
-                removeBtn.remove();
-
-                // Add restore button
-                const restoreBtn = document.createElement('button');
-                restoreBtn.type = 'button';
-                restoreBtn.className = 'btn btn-primary btn-sm position-absolute top-0 end-0 m-1 restore-image';
-                restoreBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
-                    </svg>
+            if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
+                console.log('Confirmed, sending request...');
+                
+                // Show loading
+                const originalHTML = this.innerHTML;
+                this.innerHTML = `
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 `;
-                imageItem.appendChild(restoreBtn);
+                this.disabled = true;
 
-                // Restore functionality
-                restoreBtn.addEventListener('click', function() {
-                    imageItem.style.opacity = '1';
-                    imageItem.style.border = 'none';
-                    restoreBtn.remove();
-
-                    // Remove from delete list
-                    input.remove();
-
-                    // Add back remove button
-                    const newRemoveBtn = document.createElement('button');
-                    newRemoveBtn.type = 'button';
-                    newRemoveBtn.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 m-1 remove-existing-image';
-                    newRemoveBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                        </svg>
-                    `;
-                    imageItem.appendChild(newRemoveBtn);
+                // Send request
+                fetch(`/admin/jalur-mitigasi/${jalurId}/delete-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({ image_path: imagePath })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data);
+                    if (data.success) {
+                        // Remove image element
+                        const imageElement = document.getElementById(`image-${index}`);
+                        if (imageElement) {
+                            imageElement.remove();
+                            showAlert('Gambar berhasil dihapus!', 'success');
+                        }
+                    } else {
+                        showAlert('' + data.message, 'danger');
+                        this.innerHTML = originalHTML;
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Terjadi kesalahan', 'danger');
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
                 });
             }
         });
+    });
+}
+
+// Simple alert function
+function showAlert(message, type) {
+    // Remove existing alerts
+    const existingAlert = document.querySelector('.ajax-alert');
+    if (existingAlert) existingAlert.remove();
+
+    // Create new alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show ajax-alert mt-3`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    // Insert at top of card body
+    const cardBody = document.querySelector('.card-body');
+    if (cardBody) {
+        cardBody.insertBefore(alertDiv, cardBody.firstChild);
     }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page loaded, initializing...');
+    initDeleteButtons();
 });
+
+// Also try initializing after a short delay (in case of dynamic content)
+setTimeout(initDeleteButtons, 100);
 </script>
 @endsection

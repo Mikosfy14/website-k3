@@ -31,4 +31,5 @@ Route::middleware(['auth', 'admin', 'prevent.back'])->prefix('admin')->name('adm
     Route::resource('jalur-mitigasi', JalurMitigasiController::class);
     Route::resource('lantai', LantaiController::class);
     Route::resource('ruangan', RuanganController::class);
+    Route::post('/jalur-mitigasi/{id}/delete-image', [JalurMitigasiController::class, 'deleteImage'])->name('jalur-mitigasi.delete-image');
 });

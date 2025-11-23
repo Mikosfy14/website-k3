@@ -11,20 +11,30 @@ class LantaiSeeder extends Seeder
 {
     public function run(): void
     {
+        // Hapus data lama
+        Lantai::truncate();
+
         $gedung = Gedung::first();  // mengambil gedung pertama
         $jalurUtama = JalurMitigasi::first();  // mengambil jalur pertama
-        $jalurAlternatif = JalurMitigasi::skip(1)->first();  // mengambil jalur kedua
 
-        Lantai::create([
-            'id_gedung' => $gedung->id_gedung,
-            'id_jalur' => $jalurUtama->id_jalur,
-            'nama_lantai' => 'Lantai 1',
-        ]);
+        // Data lantai sesuai kebutuhan
+        $lantaiData = [
+            ['Lantai 1', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 2', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 3', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 4', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 5', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 6', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 7', $gedung->id_gedung, $jalurUtama->id_jalur],
+            ['Lantai 8', $gedung->id_gedung, $jalurUtama->id_jalur],
+        ];
 
-        Lantai::create([
-            'id_gedung' => $gedung->id_gedung,
-            'id_jalur' => $jalurAlternatif->id_jalur,
-            'nama_lantai' => 'Lantai 2',
-        ]);
+        foreach ($lantaiData as $data) {
+            Lantai::create([
+                'nama_lantai' => $data[0],
+                'id_gedung' => $data[1],
+                'id_jalur' => $data[2],
+            ]);
+        }
     }
 }

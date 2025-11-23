@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JalurMitigasi;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class JalurMitigasiController extends Controller
 {
@@ -116,8 +117,57 @@ class JalurMitigasiController extends Controller
 
         $data['gambar_jalur_url'] = !empty($existingImages) ? json_encode($existingImages) : null;
 
+        Log::info('Hapus gambar request:', $request->hapus_gambar ?? []);
+        Log::info('Existing images before:', $existingImages);
+        Log::info('Data to update:', $data);
         $jalur->update($data);
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
+    }
+
+    // TAMBAHKAN METHOD INI UNTUK DELETE GAMBAR VIA AJAX
+    public function deleteImage(Request $request, $id)
+    {
+        try {
+            $jalur = JalurMitigasi::findOrFail($id);
+            $imagePath = $request->image_path;
+
+            // Get current images
+            $currentImages = $jalur->gambar_jalur_url ? json_decode($jalur->gambar_jalur_url, true) : [];
+
+            // Find and remove the image
+            if (($key = array_search($imagePath, $currentImages)) !== false) {
+                // Delete from storage
+                Storage::disk('public')->delete($imagePath);
+
+                // Remove from array
+                unset($currentImages[$key]);
+
+                // Re-index array
+                $currentImages = array_values($currentImages);
+
+                // Update database
+                $jalur->update([
+                    'gambar_jalur_url' => !empty($currentImages) ? json_encode($currentImages) : null
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Gambar berhasil dihapus'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gambar tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error deleting image: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
