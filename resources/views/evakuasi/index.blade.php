@@ -16,7 +16,7 @@
                 <!-- Gambar di sebelah kanan -->
                 <div class="col-lg-6 position-relative">
                     <div class="hero-image-container">
-                        <img src="{{ asset('images/evacuation-hero.jpg') }}" alt="ub dieng" class="hero-image animate-fade-in-left" style="animation-delay: 0.6s;">
+                        <img src="{{ asset('images/gedung-dieng.jpg') }}" alt="ub dieng" class="hero-image animate-fade-in-left" style="animation-delay: 0.6s;">
                     </div>
                 </div>
             </div>

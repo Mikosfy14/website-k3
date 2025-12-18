@@ -21,6 +21,20 @@
                 </div>
             </div>
 
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+        <img src="{{ asset('images/gedung-dieng.jpg') }}" 
+             alt="Background K3"
+             class="w-full h-full object-cover"
+             style="opacity: 0.50;"> <!-- Atur opacity di sini -->
+        </div>
+    
+        <!-- Pattern overlay (opsional) -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+        </div>
+
             <div class="relative z-10 flex flex-col items-center justify-center w-full px-12 text-white">
                 <!-- Logo/Image Area -->
                 <div class="mb-8">
@@ -145,17 +159,6 @@
                         </div>
                     </div>
 
-                    <!-- Remember Me -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="remember" id="remember"
-                                class="h-4 w-4 rounded border-gray-300 focus:ring-2 transition-all">
-                            <label for="remember" class="ml-2 block text-sm text-gray-700">
-                                Ingat Saya
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Submit Button -->
                     <div>
                         <button type="submit"
@@ -170,17 +173,6 @@
                         </button>
                     </div>
                 </form>
-
-                <!-- Divider -->
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <p class="text-center text-sm text-gray-600">
-                        Butuh bantuan?
-                        <a href="/" class="font-semibold hover:underline"
-                            style="color: var(--color-secondary);">
-                            Kembali ke Beranda
-                        </a>
-                    </p>
-                </div>
 
                 <!-- Footer Info -->
                 <div class="mt-8 text-center">

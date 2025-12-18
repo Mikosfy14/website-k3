@@ -93,71 +93,34 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h5 class="mb-0 fw-bold">Aksi Cepat</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <a href="{{ route('admin.gedung.create') }}" class="btn btn-outline-primary w-100 py-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                <div>Tambah Gedung</div>
-                            </a>
-                        </div>
-                    <div class="col-md-3">
-                        <a href="{{ route('admin.jalur-mitigasi.create') }}" class="btn btn-outline-warning w-100 py-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
-                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                            </svg>
-                            <div>Tambah Jalur</div>
-                        </a>
-                    </div>
-                        <div class="col-md-3">
-                            <a href="{{ route('admin.lantai.create') }}" class="btn btn-outline-success w-100 py-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                <div>Tambah Lantai</div>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{{ route('admin.ruangan.create') }}" class="btn btn-outline-danger w-100 py-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="mb-2" viewBox="0 0 16 16">
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                                </svg>
-                                <div>Tambah Ruangan</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Info Section -->
-    <div class="row">
-        
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h5 class="mb-0 fw-bold">Bantuan</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">Kelola data gedung, lantai, jalur evakuasi, dan ruangan dari menu navigasi di sebelah kiri.</p>
-                    <div class="d-grid gap-2">
-                        <a href="/" class="btn btn-outline-secondary" target="_blank">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-2" viewBox="0 0 16 16">
-                                <path d="M8.5 2.687c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
-                            </svg>
-                            Lihat Landing Page
-                        </a>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-4">
+                <h5 class="mb-0 fw-bold">Bantuan</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start mb-4">
+                    <div>
+                        <p class="text-muted mb-0">Kelola data gedung, lantai, jalur evakuasi, dan ruangan dari menu navigasi di sebelah kiri.</p>
                     </div>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="/" class="btn btn-outline-secondary d-flex align-items-center justify-content-start py-3" target="_blank">
+                        <div class="d-flex align-items-center w-100">
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                                    <path d="M8.5 2.687c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
+                                </svg>
+                            </div>
+                            <div class="text-start">
+                                <div class="fw-bold fs-5">Lihat Landing Page</div>
+                                <small class="text-muted">Kunjungi halaman utama website</small>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>

@@ -11,11 +11,8 @@
                         <h4 class="mb-1 fw-bold">Data Lantai</h4>
                         <p class="text-muted mb-0">Kelola data lantai gedung</p>
                     </div>
-                    <a href="{{ route('admin.lantai.create') }}" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-                        </svg>
-                        Tambah Lantai
+                    <a href="{{ route('admin.lantai.create') }}" class="btn btn-primary d-flex align-items-center justify-content-center py-2 px-4">
+                        <div class="fw-bold">Tambah Lantai</div>
                     </a>
                 </div>
             </div>
@@ -59,12 +56,9 @@
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
                                 <div class="d-grid w-100">
-                                    <button type="submit" class="btn btn-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16">
-                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                                        </svg>
-                                        Terapkan
-                                    </button>
+                                <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center py-2 px-4 w-100">
+                                    <div class="fw-bold">Terapkan</div>
+                                </button>
                                 </div>
                             </div>
                         </div>
