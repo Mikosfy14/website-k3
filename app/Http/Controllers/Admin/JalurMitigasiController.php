@@ -24,7 +24,7 @@ class JalurMitigasiController extends Controller
             $query->where('assembly_point', $request->assembly_point);
         }
 
-        $jalurs = $query->paginate(5);
+        $jalurs = $query->paginate(5)->withQueryString();
         $assemblyPoints = JalurMitigasi::distinct()->pluck('assembly_point');
 
         return view('admin.jalur-mitigasi.index', compact('jalurs', 'assemblyPoints'));

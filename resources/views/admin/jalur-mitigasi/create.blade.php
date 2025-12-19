@@ -114,30 +114,99 @@
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('gambar_jalur');
     const previewContainer = document.getElementById('preview-container');
+    
+    // "Keranjang" untuk menampung semua file yang dipilih
+    let fileDatastore = new DataTransfer();
 
-    fileInput.addEventListener('change', function(e) {
-        previewContainer.innerHTML = '';
-        const files = Array.from(e.target.files);
-
-        files.forEach((file, index) => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    const previewDiv = document.createElement('div');
-                    previewDiv.className = 'position-relative';
-                    previewDiv.innerHTML = `
-                        <img src="${e.target.result}" class="img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
-                        <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white px-2 py-1 rounded-end" style="font-size: 0.7rem;">
-                            ${index + 1}
-                        </div>
-                    `;
-                    previewContainer.appendChild(previewDiv);
-                };
-
-                reader.readAsDataURL(file);
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const newFiles = this.files;
+            
+            // Masukkan file baru ke keranjang (cek duplikasi sederhana)
+            for (let i = 0; i < newFiles.length; i++) {
+                const file = newFiles[i];
+                // Validasi ukuran (misal 5MB)
+                if (file.size <= 5242880) { // 5MB in bytes
+                    // Cek agar file yang sama persis tidak masuk 2x
+                    let isDuplicate = false;
+                    for (let j = 0; j < fileDatastore.files.length; j++) {
+                        if (fileDatastore.files[j].name === file.name && 
+                            fileDatastore.files[j].size === file.size) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    if (!isDuplicate) {
+                        fileDatastore.items.add(file);
+                    }
+                } else {
+                    alert(`File ${file.name} terlalu besar (Max 5MB)`);
+                }
             }
+
+            // Update input asli dengan isi keranjang lengkap
+            fileInput.files = fileDatastore.files;
+
+            // Render ulang preview
+            updatePreview();
         });
+    }
+
+    function updatePreview() {
+        previewContainer.innerHTML = ''; // Reset tampilan
+        const files = fileDatastore.files;
+
+        if (files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'position-relative';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="img-thumbnail" 
+                         style="width: 120px; height: 120px; object-fit: cover;">
+                    <button type="button" 
+                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 px-2 rounded-circle remove-new-file" 
+                            data-index="${i}" title="Hapus dari daftar upload"
+                            style="line-height: 1;">
+                        &times;
+                    </button>
+                    <div class="position-absolute top-0 start-0 bg-dark bg-opacity-75 text-white px-2 py-1 rounded-end" style="font-size: 0.7rem;">
+                        ${i + 1}
+                    </div>
+                `;
+                previewContainer.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Event listener untuk tombol hapus (X) pada preview
+    previewContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-new-file')) {
+            const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+            
+            // Buat keranjang baru
+            const newDataTransfer = new DataTransfer();
+            const currentFiles = fileDatastore.files;
+
+            // Salin semua file KECUALI yang dihapus
+            for (let i = 0; i < currentFiles.length; i++) {
+                if (i !== indexToRemove) {
+                    newDataTransfer.items.add(currentFiles[i]);
+                }
+            }
+
+            // Simpan keranjang baru
+            fileDatastore = newDataTransfer;
+            fileInput.files = fileDatastore.files;
+            
+            // Update tampilan
+            updatePreview();
+        }
     });
 });
 </script>

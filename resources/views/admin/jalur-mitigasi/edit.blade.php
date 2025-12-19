@@ -98,6 +98,9 @@
                             @error('gambar_jalur')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                            @error('gambar_jalur.*')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
 
                             <!-- Preview Container for New Images -->
                             <div id="preview-container" class="mt-3 d-flex flex-wrap gap-2"></div>
@@ -141,48 +144,104 @@
 </div>
 
 <script>
-// Simple direct event binding
+function initFileAccumulation() {
+    const fileInput = document.getElementById('gambar_jalur');
+    const previewContainer = document.getElementById('preview-container');
+    let fileDatastore = new DataTransfer();
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const newFiles = this.files;
+            
+            for (let i = 0; i < newFiles.length; i++) {
+                const file = newFiles[i];
+                // Validasi size & duplikasi
+                if (file.size <= 5242880) { 
+                    let isDuplicate = false;
+                    for (let j = 0; j < fileDatastore.files.length; j++) {
+                        if (fileDatastore.files[j].name === file.name && 
+                            fileDatastore.files[j].size === file.size) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    if (!isDuplicate) fileDatastore.items.add(file);
+                } else {
+                    alert(`File ${file.name} terlalu besar (Max 5MB)`);
+                }
+            }
+
+            fileInput.files = fileDatastore.files;
+            updatePreview();
+        });
+    }
+
+    function updatePreview() {
+        if (!previewContainer) return;
+        previewContainer.innerHTML = ''; 
+        const files = fileDatastore.files;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'position-relative';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="img-thumbnail" 
+                         style="width: 120px; height: 120px; object-fit: cover;">
+                    <button type="button" 
+                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 px-2 rounded-circle remove-new-file" 
+                            data-index="${i}" title="Batalkan upload ini" style="line-height: 1;">&times;</button>
+                `;
+                previewContainer.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    if (previewContainer) {
+        previewContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-new-file')) {
+                const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+                const newDataTransfer = new DataTransfer();
+                const currentFiles = fileDatastore.files;
+
+                for (let i = 0; i < currentFiles.length; i++) {
+                    if (i !== indexToRemove) newDataTransfer.items.add(currentFiles[i]);
+                }
+
+                fileDatastore = newDataTransfer;
+                fileInput.files = fileDatastore.files;
+                updatePreview();
+            }
+        });
+    }
+}
+
 function initDeleteButtons() {
-    console.log('🔄 Initializing delete buttons...');
-    
     const deleteButtons = document.querySelectorAll('.delete-image-btn');
-    console.log('🔘 Found delete buttons:', deleteButtons.length);
     
     deleteButtons.forEach(button => {
-        // Remove existing event listeners to avoid duplicates
         button.replaceWith(button.cloneNode(true));
     });
     
-    // Re-select buttons after clone
     const freshButtons = document.querySelectorAll('.delete-image-btn');
-    
     freshButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
-            console.log('Delete button clicked directly!', this);
             
             const imagePath = this.dataset.imagePath;
             const jalurId = this.dataset.jalurId;
             const index = this.dataset.index;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            console.log('Button data:', { jalurId, imagePath, index });
-
-            if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
-                console.log('Confirmed, sending request...');
-                
-                // Show loading
+            if (confirm('Apakah Anda yakin ingin menghapus gambar lama ini dari database?')) {
                 const originalHTML = this.innerHTML;
-                this.innerHTML = `
-                    <div class="spinner-border spinner-border-sm" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                `;
+                this.innerHTML = `<div class="spinner-border spinner-border-sm" role="status"></div>`;
                 this.disabled = true;
 
-                // Send request
                 fetch(`/admin/jalur-mitigasi/${jalurId}/delete-image`, {
                     method: 'POST',
                     headers: {
@@ -193,9 +252,7 @@ function initDeleteButtons() {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Response:', data);
                     if (data.success) {
-                        // Remove image element
                         const imageElement = document.getElementById(`image-${index}`);
                         if (imageElement) {
                             imageElement.remove();
@@ -218,34 +275,24 @@ function initDeleteButtons() {
     });
 }
 
-// Simple alert function
+// Helper Alert
 function showAlert(message, type) {
-    // Remove existing alerts
     const existingAlert = document.querySelector('.ajax-alert');
     if (existingAlert) existingAlert.remove();
 
-    // Create new alert
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show ajax-alert mt-3`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+    alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
 
-    // Insert at top of card body
     const cardBody = document.querySelector('.card-body');
-    if (cardBody) {
-        cardBody.insertBefore(alertDiv, cardBody.firstChild);
-    }
+    if (cardBody) cardBody.insertBefore(alertDiv, cardBody.firstChild);
 }
 
-// Initialize when page loads
+// --- MAIN INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Page loaded, initializing...');
-    initDeleteButtons();
+    
+    initDeleteButtons();       // Jalankan logika hapus gambar lama
+    initFileAccumulation();    // Jalankan logika upload gambar baru (Code Baru)
 });
-
-// Also try initializing after a short delay (in case of dynamic content)
-setTimeout(initDeleteButtons, 100);
 </script>
 @endsection

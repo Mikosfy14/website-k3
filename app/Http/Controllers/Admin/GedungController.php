@@ -20,7 +20,7 @@ class GedungController extends Controller
             });
         }
 
-        $gedungs = $query->paginate(5);
+        $gedungs = $query->paginate(5)->withQueryString();
 
         return view('admin.gedung.index', compact('gedungs'));
     }

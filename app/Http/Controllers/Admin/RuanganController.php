@@ -23,7 +23,7 @@ class RuanganController extends Controller
             $query->where('id_lantai', $request->lantai);
         }
 
-        $ruangans = $query->paginate(5);
+        $ruangans = $query->paginate(5)->withQueryString();
         $lantais = Lantai::with('gedung')->get();
 
         return view('admin.ruangan.index', compact('ruangans', 'lantais'));

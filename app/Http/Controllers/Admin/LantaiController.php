@@ -24,7 +24,7 @@ class LantaiController extends Controller
             $query->where('id_gedung', $request->gedung);
         }
 
-        $lantais = $query->paginate(5);
+        $lantais = $query->paginate(5)->withQueryString();
         $gedungs = Gedung::all();
 
         return view('admin.lantai.index', compact('lantais', 'gedungs'));
