@@ -1,22 +1,30 @@
 <x-layouts.public>
     <x-slot:title>Beranda</x-slot:title>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
+<section class="hero-section overflow-hidden">
         <div class="container-fluid">
-            <div class="row align-items-center min-vh-100">
-                <!-- Content di sebelah kiri -->
-                <div class="col-lg-6">
-                    <div class="ps-lg-5">
-                        <h1 class="display-4 fw-bold mb-3 animate-fade-in-up" style="animation-delay: 0.2s;">Sistem Informasi Jalur Evakuasi</h1>
-                        <p class="lead mb-4 animate-fade-in-up" style="animation-delay: 0.4s;">Temukan jalur evakuasi terdekat berdasarkan lokasi Anda saat ini. Keselamatan Anda adalah prioritas kami.</p>
+            <div class="row align-items-center min-vh-100-lg py-5">
+                
+                <div class="col-lg-6 order-1 order-lg-1 text-center text-lg-start z-index-1">
+                    <div class="ps-lg-5 px-3 px-lg-0">
+                        <h1 class="display-4 fw-bold mb-3 animate-fade-in-up hero-title" style="animation-delay: 0.2s;">
+                            Sistem Informasi <br class="d-lg-none"> Jalur Evakuasi
+                        </h1>
+                        <p class="lead mb-4 animate-fade-in-up mx-auto mx-lg-0 hero-desc" style="animation-delay: 0.4s;">
+                            Temukan jalur evakuasi terdekat berdasarkan lokasi Anda saat ini. Keselamatan Anda adalah prioritas kami.
+                        </p>
+                        
+                        <div class="d-grid d-lg-none animate-fade-in-up" style="animation-delay: 0.5s;">
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Gambar di sebelah kanan -->
-                <div class="col-lg-6 position-relative">
-                    <div class="hero-image-container">
-                        <img src="{{ asset('images/gedung-dieng.jpg') }}" alt="ub dieng" class="hero-image animate-fade-in-left" style="animation-delay: 0.6s;">
+                <div class="col-lg-6 position-relative order-2 order-lg-2 mt-4 mt-lg-0">
+                    <div class="hero-image-container text-center text-lg-end">
+                        <img src="{{ asset('images/gedung-dieng.jpg') }}" 
+                             alt="ub dieng" 
+                             class="hero-image animate-fade-in-left img-fluid rounded-4 shadow-sm" 
+                             style="animation-delay: 0.6s;">
                     </div>
                 </div>
             </div>
