@@ -12,7 +12,7 @@ class JalurMitigasi extends Model
     protected $table = 'jalur_mitigasi';
     protected $primaryKey = 'id_jalur';
 
-    protected $fillable = ['nama_jalur', 'deskripsi_teks', 'gambar_jalur_url', 'assembly_point'];
+    protected $fillable = ['nama_jalur', 'deskripsi_teks', 'assembly_point'];
 
     // Relasi: Jalur has many Lantai (asumsi one-to-many, kalau one-to-one bisa belongsTo)
     public function lantais()
@@ -20,15 +20,16 @@ class JalurMitigasi extends Model
         return $this->hasMany(Lantai::class, 'id_jalur', 'id_jalur');
     }
 
-    // Accessor untuk mendapatkan array gambar
+    // Relasi: Jalur has many gambar (satu baris per gambar, urut sesuai upload)
+    public function gambars()
+    {
+        return $this->hasMany(JalurGambar::class, 'id_jalur', 'id_jalur')->orderBy('urutan');
+    }
+
+    // Accessor untuk mendapatkan array path gambar
     public function getGambarUrlsAttribute()
     {
-        if (empty($this->gambar_jalur_url)) {
-            return [];
-        }
-
-        $decoded = json_decode($this->gambar_jalur_url, true);
-        return is_array($decoded) ? $decoded : [];
+        return $this->gambars->pluck('path')->all();
     }
 
     // Accessor untuk mendapatkan URL gambar dengan full path

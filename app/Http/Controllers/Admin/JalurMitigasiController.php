@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JalurMitigasi;
+use App\Models\JalurGambar;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -12,7 +13,7 @@ class JalurMitigasiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JalurMitigasi::query();
+        $query = JalurMitigasi::with('gambars');
 
         // Search berdasarkan nama jalur
         if ($request->has('search') && !empty($request->search)) {
@@ -47,31 +48,35 @@ class JalurMitigasiController extends Controller
 
         $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
 
-        // Handle multiple image uploads
+        $jalur = JalurMitigasi::create($data);
+
+        // Handle multiple image uploads - satu baris JalurGambar per file
         if ($request->hasFile('gambar_jalur')) {
-            $uploadedPaths = [];
+            $urutan = 0;
             foreach ($request->file('gambar_jalur') as $file) {
                 if ($file && $file->isValid()) {
                     $path = $file->store('jalur-mitigasi', 'public');
-                    $uploadedPaths[] = $path;
+                    JalurGambar::create([
+                        'id_jalur' => $jalur->id_jalur,
+                        'path' => $path,
+                        'urutan' => $urutan++,
+                    ]);
                 }
             }
-            $data['gambar_jalur_url'] = !empty($uploadedPaths) ? json_encode($uploadedPaths) : null;
         }
 
-        JalurMitigasi::create($data);
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil ditambahkan.');
     }
 
     public function show($id)
     {
-        $jalur = JalurMitigasi::findOrFail($id);
+        $jalur = JalurMitigasi::with('gambars')->findOrFail($id);
         return view('admin.jalur-mitigasi.show', compact('jalur'));
     }
 
     public function edit($id)
     {
-        $jalur = JalurMitigasi::findOrFail($id);
+        $jalur = JalurMitigasi::with('gambars')->findOrFail($id);
         return view('admin.jalur-mitigasi.edit', compact('jalur'));
     }
 
@@ -87,35 +92,33 @@ class JalurMitigasiController extends Controller
             'assembly_point' => 'required|string|max:100',
         ]);
 
-        $jalur = JalurMitigasi::findOrFail($id);
+        $jalur = JalurMitigasi::with('gambars')->findOrFail($id);
 
         $data = $request->only(['nama_jalur', 'deskripsi_teks', 'assembly_point']);
 
-        // Get existing images
-        $existingImages = $jalur->gambar_jalur_url ? json_decode($jalur->gambar_jalur_url, true) : [];
-
-        // Remove deleted images from storage and array
+        // Hapus gambar yang ditandai untuk dihapus (file di disk + baris DB)
         if ($request->has('hapus_gambar')) {
-            foreach ($request->hapus_gambar as $imagePath) {
-                if (\in_array($imagePath, $existingImages)) {
-                    Storage::disk('public')->delete($imagePath);
-                    $existingImages = array_diff($existingImages, [$imagePath]);
-                }
+            $toDelete = $jalur->gambars->whereIn('path', $request->hapus_gambar);
+            foreach ($toDelete as $gambar) {
+                Storage::disk('public')->delete($gambar->path);
+                $gambar->delete();
             }
-            $existingImages = array_values($existingImages); // Re-index array
         }
 
-        // Handle new image uploads
+        // Tambah gambar baru, lanjutkan urutan dari yang tersisa
         if ($request->hasFile('gambar_jalur')) {
+            $urutan = (int) $jalur->gambars()->max('urutan') + 1;
             foreach ($request->file('gambar_jalur') as $file) {
                 if ($file && $file->isValid()) {
                     $path = $file->store('jalur-mitigasi', 'public');
-                    $existingImages[] = $path;
+                    JalurGambar::create([
+                        'id_jalur' => $jalur->id_jalur,
+                        'path' => $path,
+                        'urutan' => $urutan++,
+                    ]);
                 }
             }
         }
-
-        $data['gambar_jalur_url'] = !empty($existingImages) ? json_encode($existingImages) : null;
 
         $jalur->update($data);
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
@@ -128,24 +131,11 @@ class JalurMitigasiController extends Controller
             $jalur = JalurMitigasi::findOrFail($id);
             $imagePath = $request->image_path;
 
-            // Get current images
-            $currentImages = $jalur->gambar_jalur_url ? json_decode($jalur->gambar_jalur_url, true) : [];
+            $gambar = $jalur->gambars()->where('path', $imagePath)->first();
 
-            // Find and remove the image
-            if (($key = array_search($imagePath, $currentImages)) !== false) {
-                // Delete from storage
-                Storage::disk('public')->delete($imagePath);
-
-                // Remove from array
-                unset($currentImages[$key]);
-
-                // Re-index array
-                $currentImages = array_values($currentImages);
-
-                // Update database
-                $jalur->update([
-                    'gambar_jalur_url' => !empty($currentImages) ? json_encode($currentImages) : null
-                ]);
+            if ($gambar) {
+                Storage::disk('public')->delete($gambar->path);
+                $gambar->delete();
 
                 return response()->json([
                     'success' => true,
@@ -162,23 +152,19 @@ class JalurMitigasiController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan saat menghapus gambar.'
             ], 500);
         }
     }
 
     public function destroy($id)
     {
-        $jalur = JalurMitigasi::findOrFail($id);
+        $jalur = JalurMitigasi::with('gambars')->findOrFail($id);
 
-        // Delete all associated images from storage
-        if ($jalur->gambar_jalur_url) {
-            $images = json_decode($jalur->gambar_jalur_url, true);
-            if (\is_array($images)) {
-                foreach ($images as $imagePath) {
-                    Storage::disk('public')->delete($imagePath);
-                }
-            }
+        // Hapus semua file gambar fisik; baris jalur_gambar ikut terhapus
+        // otomatis lewat foreign key onDelete('cascade').
+        foreach ($jalur->gambars as $gambar) {
+            Storage::disk('public')->delete($gambar->path);
         }
 
         $jalur->delete();

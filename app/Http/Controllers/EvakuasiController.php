@@ -10,14 +10,19 @@ class EvakuasiController extends Controller
 {
     public function index()
     {
-        $lantais = Lantai::with('gedung')->get();
+        // Eager load ruangans supaya tidak query per-lantai di loop (N+1).
+        $lantais = Lantai::with([
+            'gedung',
+            'ruangans' => function ($query) {
+                $query->select('id_ruangan', 'id_lantai', 'nama_ruangan', 'kode_ruangan');
+            },
+        ])->get();
 
-        // Preload data ruangan untuk setiap lantai
+        // Preload data ruangan untuk setiap lantai dari relasi yang sudah di-load
         $ruanganData = [];
         foreach ($lantais as $lantai) {
-            $ruanganData[$lantai->nama_lantai] = Ruangan::where('id_lantai', $lantai->id_lantai)
-                ->select('nama_ruangan', 'kode_ruangan')
-                ->get()
+            $ruanganData[$lantai->nama_lantai] = $lantai->ruangans
+                ->map(fn ($r) => ['nama_ruangan' => $r->nama_ruangan, 'kode_ruangan' => $r->kode_ruangan])
                 ->toArray();
         }
 

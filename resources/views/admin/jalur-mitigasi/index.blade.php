@@ -95,7 +95,7 @@
                                         <span class="badge bg-success">{{ $jalur->assembly_point }}</span>
                                     </td>
                                     <td class="text-center">
-                                        @if($jalur->gambar_jalur_url)
+                                        @if($jalur->gambars->isNotEmpty())
                                             <span class="badge bg-info">Ada</span>
                                         @else
                                             <span class="badge bg-secondary">Tidak Ada</span>
