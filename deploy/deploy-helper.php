@@ -35,6 +35,17 @@ try {
 $secret = (string) env('DEPLOY_SECRET', '');
 $given = (string) ($_GET['token'] ?? '');
 
+// Diagnostik tanpa token - TIDAK menampilkan isi secret, cuma panjang
+// karakternya, supaya bisa dicek apakah .env terbaca & token cocok
+// tanpa membocorkan nilai sebenarnya ke publik.
+if (($_GET['action'] ?? '') === 'diag') {
+    echo "APP_KEY terbaca: " . (env('APP_KEY') ? 'ya' : 'TIDAK') . "\n";
+    echo "DEPLOY_SECRET panjang: " . strlen($secret) . " karakter" . ($secret === '' ? ' (KOSONG - .env gagal terbaca atau baris ini tidak ada)' : '') . "\n";
+    echo "Token yang kamu kirim panjang: " . strlen($given) . " karakter\n";
+    echo "Cocok persis: " . (hash_equals($secret, $given) ? 'YA' : 'TIDAK') . "\n";
+    exit;
+}
+
 if ($secret === '' || !hash_equals($secret, $given)) {
     http_response_code(403);
     echo "Token salah, kosong, atau DEPLOY_SECRET belum diset di .env.\n";
@@ -60,6 +71,21 @@ try {
         case 'migrate':
             \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             echo \Illuminate\Support\Facades\Artisan::output();
+            break;
+
+        // Dipakai SEKALI kalau migrate gagal di tengah jalan (MySQL tidak
+        // membungkus CREATE TABLE dalam transaksi, jadi tabel dari migrasi
+        // yang gagal bisa sudah fisik ada walau Laravel belum mencatatnya
+        // sebagai "sudah jalan"). Ini hanya menghapus tabel KOSONG dari
+        // migrasi pertama (users/password_reset_tokens/sessions) supaya
+        // 'migrate' bisa dicoba ulang dari awal dengan bersih.
+        case 'reset-first-migration':
+            $tables = ['sessions', 'password_reset_tokens', 'users'];
+            foreach ($tables as $t) {
+                \Illuminate\Support\Facades\Schema::dropIfExists($t);
+                echo "Drop (kalau ada): {$t}\n";
+            }
+            echo "\nSelesai. Cek lagi dengan action=migrate-status, lalu coba action=migrate lagi.\n";
             break;
 
         case 'migrate-status':
