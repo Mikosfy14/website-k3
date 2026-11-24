@@ -63,18 +63,18 @@
                             @enderror
                         </div>
 
-                        @if(!empty($jalur->gambar_urls) && count($jalur->gambar_urls) > 0)
+                        @if($jalur->gambars->isNotEmpty())
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Gambar Saat Ini</label>
                             <div class="d-flex flex-wrap gap-2" id="existing-images">
-                                @foreach($jalur->gambar_urls as $index => $imagePath)
-                                <div class="position-relative existing-image-item" id="image-{{ $index }}" data-path="{{ $imagePath }}">
-                                    <img src="{{ asset('storage/' . $imagePath) }}"
+                                @foreach($jalur->gambars as $index => $gambar)
+                                <div class="position-relative existing-image-item" id="image-{{ $index }}" data-path="{{ $gambar->path }}">
+                                    <img src="{{ $gambar->url }}"
                                         class="img-thumbnail"
                                         style="width: 120px; height: 120px; object-fit: cover;">
-                                    <button type="button" 
+                                    <button type="button"
                                             class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-image-btn"
-                                            data-image-path="{{ $imagePath }}"
+                                            data-image-path="{{ $gambar->path }}"
                                             data-jalur-id="{{ $jalur->id_jalur }}"
                                             data-index="{{ $index }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">

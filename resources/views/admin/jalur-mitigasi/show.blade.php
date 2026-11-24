@@ -68,18 +68,18 @@
                     <!-- Gambar Jalur -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold text-muted small">GAMBAR JALUR EVAKUASI</label>
-                        @if(!empty($jalur->gambar_urls))
+                        @if($jalur->gambars->isNotEmpty())
                             <div class="row g-3">
-                                @foreach($jalur->gambar_urls as $index => $imagePath)
+                                @foreach($jalur->gambars as $index => $gambar)
                                 <div class="col-md-6">
                                     <div class="card">
-                                        <img src="{{ asset('storage/' . $imagePath) }}"
+                                        <img src="{{ $gambar->url }}"
                                              class="card-img-top"
                                              alt="Gambar Jalur {{ $index + 1 }}"
                                              style="height: 200px; object-fit: cover;">
                                         <div class="card-body">
                                             <p class="card-text text-muted small mb-2">Gambar {{ $index + 1 }}</p>
-                                            <a href="{{ asset('storage/' . $imagePath) }}"
+                                            <a href="{{ $gambar->url }}"
                                                target="_blank"
                                                class="btn btn-sm btn-outline-primary w-100 fw-bold px-4">
                                                 Lihat Penuh
@@ -125,7 +125,7 @@
                     </h6>
                     <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
                         <span class="text-muted">Total Gambar</span>
-                        <span class="fw-bold fs-5 text-warning">{{ !empty($jalur->gambar_urls) ? count($jalur->gambar_urls) : 0 }}</span>
+                        <span class="fw-bold fs-5 text-warning">{{ $jalur->gambars->count() }}</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
                         <span class="text-muted">Lantai Terkait</span>

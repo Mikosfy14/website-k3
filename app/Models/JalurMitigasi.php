@@ -33,10 +33,9 @@ class JalurMitigasi extends Model
     }
 
     // Accessor untuk mendapatkan URL gambar dengan full path
+    // (dibentuk oleh JalurGambar::getUrlAttribute, lewat disk config)
     public function getGambarFullUrlsAttribute()
     {
-        return array_map(function ($path) {
-            return asset('storage/' . $path);
-        }, $this->gambar_urls);
+        return $this->gambars->pluck('url')->all();
     }
 }

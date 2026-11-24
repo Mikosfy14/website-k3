@@ -66,7 +66,7 @@
                         <div class="card-body p-4">
                             <h5 class="mb-3 fw-bold text-primary-custom">{{ $jalur->nama_jalur }}</h5>
 
-                    @if(!empty($jalur->gambar_urls) && count($jalur->gambar_urls) > 0)
+                    @if($jalur->gambars->isNotEmpty())
                         <div class="mb-4">
                             <!-- Heading Section -->
                             <div class="mb-3">
@@ -80,18 +80,18 @@
                             
                             <!-- Gambar Section -->
                             <div class="row g-3">
-                                @foreach($jalur->gambar_urls as $index => $imagePath)
+                                @foreach($jalur->gambars as $index => $gambar)
                                 <div class="col-md-6 col-lg-4">
                                     <div class="text-center">
                                         <!-- Clickable Pict -->
                                         <div class="image-container position-relative mb-2">
-                                            <img src="{{ asset('storage/' . $imagePath) }}"
+                                            <img src="{{ $gambar->url }}"
                                                 alt="Peta Jalur {{ $jalur->nama_jalur }} - Gambar {{ $index + 1 }}"
                                                 class="img-fluid rounded border shadow-sm clickable-image"
                                                 style="max-height: 300px; object-fit: contain; cursor: pointer; transition: all 0.3s ease;"
-                                                data-bs-toggle="modal" 
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#imageModal"
-                                                data-image-src="{{ asset('storage/' . $imagePath) }}"
+                                                data-image-src="{{ $gambar->url }}"
                                                 data-image-name="Peta Jalur {{ $jalur->nama_jalur }} - Gambar {{ $index + 1 }}"
                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                             
@@ -112,7 +112,7 @@
                                             Gambar {{ $index + 1 }} tidak dapat dimuat
                                         </div>
                                         
-                                        @if(count($jalur->gambar_urls) > 1)
+                                        @if($jalur->gambars->count() > 1)
                                         <small class="text-muted d-block mt-2">Gambar {{ $index + 1 }}</small>
                                         @endif
                                     </div>
