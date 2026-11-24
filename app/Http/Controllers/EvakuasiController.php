@@ -21,8 +21,13 @@ class EvakuasiController extends Controller
                 ->toArray();
         }
 
-        // Convert to JSON for JavaScript
-        $ruanganDataJson = json_encode($ruanganData);
+        // Convert to JSON for JavaScript.
+        // Flag JSON_HEX_* mencegah data (misal nama ruangan berisi "</script>")
+        // memecah tag <script> saat dicetak mentah lewat {!! !!} di view.
+        $ruanganDataJson = json_encode(
+            $ruanganData,
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+        );
 
         return view('evakuasi.index', compact('lantais', 'ruanganDataJson'));
     }

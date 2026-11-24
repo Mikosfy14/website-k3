@@ -41,7 +41,7 @@ class JalurMitigasiController extends Controller
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
             'gambar_jalur' => 'nullable|array',
-            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'assembly_point' => 'required|string|max:100',
         ]);
 
@@ -81,7 +81,7 @@ class JalurMitigasiController extends Controller
             'nama_jalur' => 'required|string|max:255',
             'deskripsi_teks' => 'required|string',
             'gambar_jalur' => 'nullable|array',
-            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'gambar_jalur.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'hapus_gambar' => 'nullable|array',
             'hapus_gambar.*' => 'nullable|string',
             'assembly_point' => 'required|string|max:100',
@@ -117,9 +117,6 @@ class JalurMitigasiController extends Controller
 
         $data['gambar_jalur_url'] = !empty($existingImages) ? json_encode($existingImages) : null;
 
-        Log::info('Hapus gambar request:', $request->hapus_gambar ?? []);
-        Log::info('Existing images before:', $existingImages);
-        Log::info('Data to update:', $data);
         $jalur->update($data);
         return redirect()->route('admin.jalur-mitigasi.index')->with('success', 'Jalur mitigasi berhasil diupdate.');
     }
