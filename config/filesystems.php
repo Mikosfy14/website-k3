@@ -17,6 +17,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Serve Public Disk Lewat Route (tanpa symlink)
+    |--------------------------------------------------------------------------
+    |
+    | Sebagian shared hosting (misal InfinityFree) mematikan fungsi
+    | symlink() demi keamanan, jadi `storage:link` gagal dan gambar di
+    | disk 'public' tidak bisa diakses lewat /storage/... . Set true
+    | di .env server yang begini, supaya JalurGambar::getUrlAttribute()
+    | pakai route /media/{path} (stream manual) alih-alih URL statis.
+    | Biarkan false kalau symlink tersedia - lebih cepat & bisa
+    | di-cache browser langsung tanpa lewat PHP.
+    |
+    */
+
+    'serve_public_via_route' => env('FILESYSTEM_SERVE_VIA_ROUTE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EvakuasiController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GedungController;
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Auth;
 // Public routes (no login needed)
 Route::get('/', [EvakuasiController::class, 'index'])->name('home');
 Route::post('/cari', [EvakuasiController::class, 'cari'])->name('cari.evakuasi');
+
+// Fallback serve gambar tanpa symlink (lihat config/filesystems.php
+// 'serve_public_via_route' dan JalurGambar::getUrlAttribute()).
+Route::get('/media/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.show');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
