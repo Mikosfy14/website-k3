@@ -1,61 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Informasi Jalur Evakuasi K3
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk menemukan dan mengelola jalur evakuasi/mitigasi K3 (Keselamatan dan
+Kesehatan Kerja) pada gedung bertingkat. Dibangun untuk gedung kampus Fakultas Vokasi
+Universitas Brawijaya, Kampus 2 Dieng.
 
-## About Laravel
+**Live demo:** https://vokasievac-k3.infinityfree.io/
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Publik (tanpa login)
+- Cari jalur evakuasi berdasarkan lantai, atau berdasarkan ruangan (otomatis mengarah ke
+  lantai tempat ruangan itu berada).
+- Lihat detail jalur: deskripsi instruksi evakuasi, titik kumpul (assembly point), dan
+  galeri foto/peta jalur.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Admin (perlu login)
+- Dashboard ringkasan jumlah gedung, lantai, ruangan, dan jalur mitigasi.
+- CRUD penuh untuk:
+  - **Gedung** — nama, alamat, deskripsi singkat.
+  - **Lantai** — terhubung ke satu gedung dan satu jalur mitigasi.
+  - **Ruangan** — nama dan kode ruangan, terhubung ke satu lantai.
+  - **Jalur Mitigasi** — nama jalur, instruksi evakuasi, titik kumpul, dan upload banyak
+    foto/peta sekaligus (tambah, hapus per gambar lewat AJAX).
+- Pencarian dan filter pada setiap halaman index admin.
 
-## Learning Laravel
+## Tech stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Layer | Teknologi |
+|---|---|
+| Backend | PHP 8.2+ / Laravel 12 |
+| Frontend | Blade, Tailwind CSS 4 + Vite 7, Bootstrap 5 |
+| Database | MySQL (production) / SQLite (lokal) |
+| Auth | Laravel session-based auth, rate limiting pada login |
+| Testing | Pest |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Struktur data
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
+Gedung 1──* Lantai *──1 JalurMitigasi 1──* JalurGambar
+                │
+                1
+                │
+                *
+             Ruangan
+```
 
-## Laravel Sponsors
+- Satu **gedung** punya banyak **lantai**.
+- Setiap **lantai** terhubung ke satu **jalur mitigasi** (satu jalur bisa dipakai beberapa
+  lantai yang berbeda — misal jalur evakuasi yang sama untuk lantai 2–7).
+- Setiap **lantai** punya banyak **ruangan**.
+- Setiap **jalur mitigasi** bisa punya banyak **gambar** (foto/peta), disimpan satu baris
+  per gambar di tabel `jalur_gambar`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Instalasi lokal
 
-### Premium Partners
+```bash
+git clone <repo-url>
+cd website-k3
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+composer install
+npm install
 
-## Contributing
+cp .env.example .env
+php artisan key:generate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Isi ADMIN_EMAIL dan ADMIN_PASSWORD di .env sebelum seeding,
+# supaya ada akun admin pertama yang bisa dipakai login.
 
-## Code of Conduct
+php artisan migrate --seed
+php artisan storage:link
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+npm run build
+php artisan serve
+```
 
-## Security Vulnerabilities
+Untuk development dengan hot-reload aset:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer dev
+```
 
-## License
+(menjalankan `php artisan serve`, queue listener, dan `npm run dev` secara bersamaan)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Keamanan
+
+- Password di-hash dengan bcrypt, tidak ada kredensial admin yang hardcode di kode sumber —
+  dibuat lewat seeder yang membaca dari environment variable.
+- Login dibatasi 5 percobaan gagal per 60 detik, dikunci berdasarkan kombinasi email + IP.
+- Upload gambar dibatasi tipe file (JPEG/PNG/JPG/GIF) dan ukuran maksimum per file, SVG
+  sengaja tidak diizinkan untuk mencegah stored XSS.
+- Middleware khusus mencegah halaman admin diakses lagi lewat tombol back browser setelah
+  logout.
+
+## Routing utama
+
+| Method | URL | Keterangan |
+|---|---|---|
+| GET | `/` | Halaman pencarian publik |
+| POST | `/cari` | Proses pencarian jalur evakuasi |
+| GET/POST | `/login` | Form & proses login admin |
+| POST | `/logout` | Logout |
+| GET | `/admin/dashboard` | Dashboard admin |
+| resource | `/admin/gedung`, `/admin/lantai`, `/admin/ruangan`, `/admin/jalur-mitigasi` | CRUD masing-masing modul |
+
+## Lisensi
+
+Project ini dibuat untuk keperluan internal kampus dan portofolio pribadi.
