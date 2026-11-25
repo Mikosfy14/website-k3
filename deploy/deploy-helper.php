@@ -56,6 +56,38 @@ $action = $_GET['action'] ?? '';
 
 try {
     switch ($action) {
+        case 'media-diag':
+            $path = $_GET['path'] ?? '';
+            if ($path === '') {
+                echo "Tambahkan &path=jalur-mitigasi/namafile.jpg di URL.\n";
+                break;
+            }
+
+            echo "Path yang dicek: {$path}\n\n";
+
+            $routeExists = \Illuminate\Support\Facades\Route::has('media.show');
+            echo "Route 'media.show' terdaftar: " . ($routeExists ? 'YA' : 'TIDAK (routes/web.php belum terupdate di server)') . "\n\n";
+
+            $disk = \Illuminate\Support\Facades\Storage::disk('public');
+            $absolutePath = $disk->path($path);
+            echo "Absolute path yang dicek Laravel: {$absolutePath}\n";
+            echo "Storage::disk('public')->exists(): " . ($disk->exists($path) ? 'YA' : 'TIDAK') . "\n";
+            echo "PHP file_exists() langsung: " . (file_exists($absolutePath) ? 'YA' : 'TIDAK') . "\n";
+            echo "PHP is_readable() langsung: " . (is_readable($absolutePath) ? 'YA' : 'TIDAK') . "\n";
+
+            $dir = dirname($absolutePath);
+            echo "\nFolder induk: {$dir}\n";
+            echo "Folder induk ada: " . (is_dir($dir) ? 'YA' : 'TIDAK') . "\n";
+            if (is_dir($dir)) {
+                $files = @scandir($dir) ?: [];
+                $files = array_values(array_diff($files, ['.', '..']));
+                echo "Isi folder (" . count($files) . " item), 10 pertama:\n";
+                foreach (array_slice($files, 0, 10) as $f) {
+                    echo "  - {$f}\n";
+                }
+            }
+            break;
+
         case 'status':
             echo "PHP: " . PHP_VERSION . "\n";
             echo "App env: " . app()->environment() . "\n";
