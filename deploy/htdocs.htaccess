@@ -23,3 +23,10 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Fallback kalau mod_rewrite tidak aktif/tidak diizinkan lewat .htaccess
+# di hosting ini (umum di shared hosting gratis). Request yang tidak
+# cocok file fisik akan dapat 404 dari Apache - daripada ditampilkan
+# sebagai error, diarahkan ke index.php. Apache tetap mempertahankan
+# REQUEST_URI asli, jadi Laravel masih bisa routing dengan benar.
+ErrorDocument 404 /index.php
