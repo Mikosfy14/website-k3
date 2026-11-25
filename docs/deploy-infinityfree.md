@@ -28,6 +28,8 @@ InfinityFree hanya punya `htdocs/` sebagai web root, dan Laravel butuh
 ```
 htdocs/                          <- web root InfinityFree
 ├── index.php                    <- dari deploy/htdocs-index.php (BUKAN public/index.php asli)
+├── .htaccess                    <- dari deploy/htdocs.htaccess (WAJIB - tanpa ini semua route
+│                                    selain '/' kena 404 dari Apache, bukan dari Laravel)
 ├── favicon.ico                  <- dari public/
 ├── robots.txt                   <- dari public/
 ├── images/                      <- dari public/images/
@@ -131,6 +133,17 @@ Banyak shared hosting mematikan fungsi ini. Alternatif tanpa ubah kode:
   saat upload karena isinya cuma file `.gitignore` placeholder di git,
   foldernya sendiri mungkin tidak ikut ter-extract kalau zip-nya dibuat
   dari git working tree yang mengecualikan folder kosong.
+
+**Semua halaman selain `/` kena 404 (termasuk /login, /admin, /media/...)**
+- Ini berarti `.htaccess` di `htdocs/` (hasil copy dari `public/.htaccess` asli) tidak ada/tidak
+  terupload. Tanpa file ini, Apache tidak tahu cara mengarahkan URL ke `index.php` - dia cari
+  folder/file fisik sesuai nama URL-nya, tidak ketemu, dan langsung kasih 404 miliknya sendiri
+  (bukan 404 Laravel) sebelum request sempat sampai ke PHP.
+- Ciri-cirinya: 404 yang muncul terlihat seperti halaman error generik InfinityFree/Apache,
+  bukan halaman 404 Laravel yang biasa (ada style khusus / "419 | Page Not Found" versi Laravel).
+- Fix: upload `deploy/htdocs.htaccess` sebagai `.htaccess` di `htdocs/` (root, BUKAN di dalam
+  `core/` - itu file `.htaccess` yang berbeda, lihat struktur di atas). Pastikan nama filenya
+  benar `.htaccess` (dengan titik di depan), bukan `htaccess.txt` atau semacamnya.
 
 **CSS/JS tidak muncul (halaman polos tanpa styling)**
 - Pastikan `public/build/` ikut diupload ke `htdocs/build/` (bukan `htdocs/core/public/build/`).
