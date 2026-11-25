@@ -60,10 +60,39 @@ dipakai, isinya sudah ditaruh di tempat masing-masing).
 FTP file satu-satu untuk `vendor/` (ribuan file) akan sangat lambat.
 Lebih cepat:
 
-1. Di laptop, zip folder project (hasil susunan di atas) jadi satu file, misalnya `deploy.zip`.
-2. Upload `deploy.zip` lewat File Manager InfinityFree ke `htdocs/`.
-3. Gunakan fitur **Extract** di File Manager mereka untuk membongkar zip langsung di server.
-4. Hapus `deploy.zip` setelah berhasil diextract (jangan dibiarkan - isinya termasuk `.env`).
+1. Di laptop, masuk ke folder `deploy-package/` (bukan root project), **pilih isi di dalamnya**
+   (`core/` dan semua file+folder level `htdocs/` - lihat daftar di atas), **BUKAN folder
+   `deploy-package` itu sendiri atau folder `htdocs` sebagai pembungkus**. Compress jadi satu zip.
+   - Salah: zip berisi `htdocs/` (folder) + `core/` (folder) → hasil extract jadi
+     `htdocs/htdocs/...` (nested, index.php tidak ketemu Apache). Ini pernah terjadi dan
+     menyebabkan 404/halaman "domain ready" InfinityFree selama berjam-jam sampai ketahuan.
+   - Benar: zip berisi `index.php`, `.htaccess`, `favicon.ico`, `robots.txt`, `images/`,
+     `build/`, `deploy-helper.php`, DAN `core/` (folder) - semuanya di root zip, sejajar.
+2. Upload zip itu lewat File Manager InfinityFree **ke dalam** `htdocs/` (folder yang sudah ada
+   dari InfinityFree, isinya default cuma file placeholder "DO NOT UPLOAD..." dkk - boleh dihapus).
+3. Gunakan fitur **Extract** di File Manager mereka untuk membongkar zip langsung di situ.
+4. Hapus `deploy.zip` dan file placeholder bawaan InfinityFree (`index.html`/`index2.html`,
+   "files for your website should be uploaded here!") setelah berhasil diextract.
+5. **Cek ulang** hasil extract: `htdocs/index.php` dan `htdocs/core/` harus sejajar langsung
+   di dalam `htdocs/` - BUKAN `htdocs/htdocs/index.php`.
+
+## 3.5. WAJIB: verifikasi folder kosong ikut ter-extract
+
+Banyak tool zip/extract (termasuk File Manager InfinityFree) **tidak menyimpan folder yang
+benar-benar kosong** di dalam arsip zip. Setelah extract, cek folder-folder berikut benar-benar
+ada di `htdocs/core/storage/`:
+
+```
+storage/framework/cache/data/
+storage/framework/sessions/
+storage/framework/testing/
+storage/framework/views/
+```
+
+Kalau folder `framework/` sama sekali tidak ada (bukan cuma subfoldernya), buat manual lewat
+File Manager - ini bukan tanda ada yang salah di langkah lain, cuma folder kosong memang sering
+tidak ikut ter-extract. Gejalanya kalau terlewat: situs error 500, log di
+`storage/logs/laravel.log` bilang `InvalidArgumentException: Please provide a valid cache path.`
 
 ## 4. Setelah file terupload - jalankan deploy-helper.php
 
@@ -84,8 +113,10 @@ https://domainmu/deploy-helper.php?token=TOKEN&action=migrate
 https://domainmu/deploy-helper.php?token=TOKEN&action=storage-link
 ```
 → coba buat symlink `htdocs/storage -> core/storage/app/public` (untuk serve gambar upload).
-Kalau gagal (banyak shared hosting mematikan fungsi `symlink()` demi keamanan),
-baca pesan fallback yang muncul - lihat bagian Troubleshooting di bawah.
+Kalau gagal (banyak shared hosting mematikan fungsi `symlink()` demi keamanan - ini yang
+terjadi di InfinityFree), set `FILESYSTEM_SERVE_VIA_ROUTE=true` di `.env` server - sudah ada
+fallback route `/media/{path}` (`MediaController`) yang stream file tanpa symlink, lihat
+Troubleshooting di bawah.
 
 ```
 https://domainmu/deploy-helper.php?token=TOKEN&action=seed-admin
@@ -115,24 +146,19 @@ https://domainmu/deploy-helper.php?token=TOKEN&action=optimize
 ## Troubleshooting
 
 **`symlink()` gagal / tidak didukung di server**
-Banyak shared hosting mematikan fungsi ini. Alternatif tanpa ubah kode:
-- Opsi manual: setiap kali ada gambar baru diupload, copy folder
-  `core/storage/app/public/jalur-mitigasi/` ke `htdocs/storage/jalur-mitigasi/`
-  lewat File Manager. Merepotkan tapi tidak butuh ubah kode.
-- Opsi lebih baik (butuh sedikit kerja tambahan, belum diimplementasikan):
-  buat route Laravel yang men-stream file dari `storage/app/public/...`
-  langsung (tanpa symlink), lalu ganti `JalurGambar::getUrlAttribute()`
-  supaya mengarah ke route itu bukan ke `Storage::disk('public')->url()`.
-  Tanya dulu sebelum ini diimplementasikan - ini mengubah kode, bukan cuma konfigurasi server.
+Terjadi di InfinityFree. Sudah diimplementasikan: set `FILESYSTEM_SERVE_VIA_ROUTE=true` di
+`.env` server. `JalurGambar::getUrlAttribute()` otomatis pakai route `/media/{path}`
+(`MediaController::show`, lihat `config/filesystems.php` kunci `serve_public_via_route`)
+yang men-stream file langsung dari `storage/app/public/...` tanpa symlink. Biarkan
+`false`/kosong di lokal (lebih cepat pakai symlink statis biasa).
 
 **Halaman blank / error 500 setelah upload**
 - Cek `core/storage/logs/laravel.log` lewat File Manager (kalau `APP_DEBUG=false`,
-  error tidak ditampilkan ke browser, cuma dicatat di log ini).
-- Pastikan folder `core/storage/framework/{cache,sessions,views}` dan
-  `core/bootstrap/cache` ada dan bisa ditulis (writable) - kadang hilang
-  saat upload karena isinya cuma file `.gitignore` placeholder di git,
-  foldernya sendiri mungkin tidak ikut ter-extract kalau zip-nya dibuat
-  dari git working tree yang mengecualikan folder kosong.
+  error tidak ditampilkan ke browser, cuma dicatat di log ini) - selalu langkah pertama,
+  pesan errornya biasanya langsung menunjukkan masalahnya persis (lihat 2 entri di atas
+  untuk 2 error yang sudah pernah terjadi: cache path & Vite manifest).
+- Pastikan folder `core/storage/framework/{cache,sessions,views}`, `core/storage/framework/cache/data`,
+  dan `core/bootstrap/cache` ada dan bisa ditulis - lihat poin 3.5 di atas soal folder kosong.
 
 **Semua halaman selain `/` kena 404 (termasuk /login, /admin, /media/...)**
 - Ini berarti `.htaccess` di `htdocs/` (hasil copy dari `public/.htaccess` asli) tidak ada/tidak
@@ -145,9 +171,17 @@ Banyak shared hosting mematikan fungsi ini. Alternatif tanpa ubah kode:
   `core/` - itu file `.htaccess` yang berbeda, lihat struktur di atas). Pastikan nama filenya
   benar `.htaccess` (dengan titik di depan), bukan `htaccess.txt` atau semacamnya.
 
-**CSS/JS tidak muncul (halaman polos tanpa styling)**
+**CSS/JS tidak muncul (halaman polos tanpa styling) atau error 500 "Vite manifest not found at .../core/public/build/manifest.json"**
 - Pastikan `public/build/` ikut diupload ke `htdocs/build/` (bukan `htdocs/core/public/build/`).
 - Cek `APP_URL` di `.env` server sudah benar (dipakai Vite manifest untuk generate URL asset).
+- Kalau error log persis menyebut path `core/public/build/manifest.json` (ada kata "core"
+  di tengah), itu bukan soal file hilang - Laravel menganggap `public_path()` = `core/public`
+  (default Laravel), padahal struktur kita taruh `build/` di `htdocs/` langsung (lihat
+  struktur upload di atas). Sudah diperbaiki di `bootstrap/app.php`: kalau `core/public/`
+  tidak ada, `$app->usePublicPath()` diarahkan ke `htdocs/` (2 level di atas `bootstrap/`).
+  Development lokal tidak terpengaruh (terdeteksi otomatis dari ada/tidaknya `public/` di
+  lokasi standar). Kalau masih muncul, pastikan `bootstrap/app.php` versi terbaru sudah
+  ter-upload ke `htdocs/core/bootstrap/app.php`.
 
 **"419 Page Expired" saat login/submit form**
 - Cek `SESSION_DOMAIN` di `.env` (biarkan `null` kecuali ada alasan spesifik).
